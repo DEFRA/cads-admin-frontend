@@ -4,31 +4,53 @@ import { Engine as CatboxRedis } from '@hapi/catbox-redis'
 import { Engine as CatboxMemory } from '@hapi/catbox-memory'
 
 import { getCacheEngine } from './cache-engine.js'
-import { config } from '#/config/config.js'
+import { getConfig } from '../../../../config/config.js'
 
 const mockLoggerInfo = vi.fn()
 const mockLoggerError = vi.fn()
 
-vi.mock('ioredis', () => ({
-  ...vi.importActual('ioredis'),
-  Cluster: vi.fn(function () {
-    return { on: () => ({}) }
-  }),
-  Redis: vi.fn(function () {
-    return { on: () => ({}) }
-  })
-}))
-vi.mock('@hapi/catbox-redis')
-vi.mock('@hapi/catbox-memory')
 vi.mock('../logging/logger.js', () => ({
   createLogger: () => ({
-    info: (...args) => mockLoggerInfo(...args),
-    error: (...args) => mockLoggerError(...args)
+    info: mockLoggerInfo,
+    error: mockLoggerError
   })
+}))
+
+vi.mock('ioredis', () => {
+  class MockRedis {
+    constructor() {
+      this.on = vi.fn()
+    }
+  }
+
+  class MockCluster {
+    constructor() {
+      this.on = vi.fn()
+    }
+  }
+
+  return {
+    default: MockRedis,
+    Redis: MockRedis,
+    Cluster: MockCluster
+  }
+})
+
+vi.mock('@hapi/catbox-redis', () => ({
+  Engine: vi.fn()
+}))
+
+vi.mock('@hapi/catbox-memory', () => ({
+  Engine: vi.fn()
 }))
 
 describe('#getCacheEngine', () => {
   describe('When Redis cache engine has been requested', () => {
+    afterEach(() => {
+      getConfig().set('isProduction', false)
+      vi.clearAllMocks()
+    })
+
     beforeEach(() => {
       getCacheEngine('redis')
     })
@@ -43,6 +65,11 @@ describe('#getCacheEngine', () => {
   })
 
   describe('When In memory cache engine has been requested', () => {
+    afterEach(() => {
+      getConfig().set('isProduction', false)
+      vi.clearAllMocks()
+    })
+
     beforeEach(() => {
       getCacheEngine()
     })
@@ -59,8 +86,13 @@ describe('#getCacheEngine', () => {
   })
 
   describe('When In memory cache engine has been requested in Production', () => {
+    afterEach(() => {
+      getConfig().set('isProduction', false)
+      vi.clearAllMocks()
+    })
+
     beforeEach(() => {
-      config.set('isProduction', true)
+      getConfig().set('isProduction', true)
       getCacheEngine()
     })
 

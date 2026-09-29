@@ -1,24 +1,42 @@
 import path from 'path'
 import hapi from '@hapi/hapi'
 import Scooter from '@hapi/scooter'
+import Cookie from '@hapi/cookie'
 
-import { router } from './plugins/router.js'
-import { config } from '#/config/config.js'
-import { pulse } from './plugins/pulse.js'
+import { router } from './router.js'
+import { getConfig } from '../config/config.js'
+
+import { pulse } from './common/helpers/pulse.js'
 import { catchAll } from './common/helpers/errors.js'
-import { nunjucksConfig } from '#/config/nunjucks/nunjucks.js'
-import { requestTracing } from './plugins/request-tracing.js'
-import { requestLogger } from './plugins/request-logger.js'
-import { sessionCache } from './plugins/session-cache.js'
+import { nunjucksConfig } from '../config/nunjucks/nunjucks.js'
+import { setupProxy } from './common/helpers/proxy/setup-proxy.js'
+import { getRequestTracing } from './common/helpers/request-tracing.js'
+import { requestLogger } from './common/helpers/logging/request-logger.js'
 import { getCacheEngine } from './common/helpers/session-cache/cache-engine.js'
 import { secureContext } from '@defra/hapi-secure-context'
-import { contentSecurityPolicy } from './plugins/content-security-policy.js'
-import { metrics } from '@defra/cdp-metrics'
+import { contentSecurityPolicy } from './common/helpers/content-security-policy.js'
+
+import { registerSessionMiddleware } from '../auth/session-middleware.js'
+import { loginRoutes } from '../auth/routes-login.js'
+import { logoutRoutes } from '../auth/routes-logout.js'
+import { debugAuthRoutes } from '../auth/debug/debug-routes.js'
+import { getSessionAuthStrategy } from '../auth/plugins/session-strategy.js'
 
 export async function createServer() {
+  setupProxy()
+
+  // Lazily read config values
+  const config = getConfig()
+  const host = config.get('host')
+  const port = config.get('port')
+  const root = config.get('root')
+
+  const sessionCacheName = config.get('session.cache.name')
+  const sessionCacheEngine = config.get('session.cache.engine')
+
   const server = hapi.server({
-    host: config.get('host'),
-    port: config.get('port'),
+    host,
+    port,
     routes: {
       validate: {
         options: {
@@ -26,7 +44,7 @@ export async function createServer() {
         }
       },
       files: {
-        relativeTo: path.resolve(config.get('root'), '.public')
+        relativeTo: path.resolve(root, '.public')
       },
       security: {
         hsts: {
@@ -44,27 +62,53 @@ export async function createServer() {
     },
     cache: [
       {
-        name: config.get('session.cache.name'),
-        engine: getCacheEngine(config.get('session.cache.engine'))
+        name: sessionCacheName,
+        engine: getCacheEngine(sessionCacheEngine)
       }
     ],
     state: {
       strictHeader: false
     }
   })
+
+  // Register cookieAuth (persistent session cookie)
+  await server.register(Cookie)
+
+  const authStrategy = getSessionAuthStrategy()
+  server.auth.strategy(
+    authStrategy.name,
+    authStrategy.scheme,
+    authStrategy.options
+  )
+
+  server.auth.default('session')
+
+  // Register your plugins + global router
   await server.register([
     requestLogger,
-    requestTracing,
-    metrics,
+    getRequestTracing(),
     secureContext,
     pulse,
-    sessionCache,
     nunjucksConfig,
     Scooter,
     contentSecurityPolicy,
     router // Register all the controllers/routes defined in src/server/router.js
   ])
 
+  // await server.register(getSessionCache())
+
+  // Register auth routes (login, callback, logout)
+  server.route([...loginRoutes, ...logoutRoutes])
+
+  // Debug auth routes
+  if (config.get('oidc.enableDebugEndpoints')) {
+    server.route([...debugAuthRoutes])
+  }
+
+  // Register session middleware (Redis session + token refresh)
+  registerSessionMiddleware(server)
+
+  // Global error handler
   server.ext('onPreResponse', catchAll)
 
   return server

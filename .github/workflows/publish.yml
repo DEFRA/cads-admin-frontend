@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+      - develop
+      - "feature/**"
 
 concurrency:
   group: $${{ github.workflow }}
@@ -28,24 +30,26 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v7
 
-      - name: Test code and Create Test Coverage Reports
-        uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: npm
       - run: |
           npm ci
           npm run build:frontend
-          npm test
+          npm run format:check
+          npm run lint
+
+      - name: Security audit
+        run: npm audit signatures
+
+      - name: Run Tests
+        run: npm test
 
       - name: Build and Publish
         uses: DEFRA/cdp-build-action/build@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-#      - name: SonarCloud Scan
-#        uses: SonarSource/sonarqube-scan-action@v5.3.1 #  (or check latest version on https://github.com/marketplace/actions/official-sonarqube-scan)
-#        continue-on-error: true
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

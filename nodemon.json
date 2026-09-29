@@ -3,7 +3,13 @@
   "env": {
     "NODE_ENV": "development"
   },
-  "ignore": ["**/*.test.*", "./src/server/common/test-helpers", "./src/client"],
+  "ignore": [
+    "**/*.test.*",
+    "./test-helpers",
+    "./src/client",
+    "./src/server/common/components",
+    "./src/server/common/templates/partials"
+  ],
   "ext": "cjs,js,json",
   "signal": "SIGINT"
 }

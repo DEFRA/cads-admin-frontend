@@ -1,17 +1,37 @@
 import { statusCodes } from '../constants/status-codes.js'
 
-function statusCodeMessage(statusCode) {
+function statusCodeDetails(statusCode) {
   switch (statusCode) {
     case statusCodes.notFound:
-      return 'Page not found'
+      return [
+        'Page not found',
+        'The page you are looking for has not been found',
+        'If you think there should be a page here, contact your administrator.'
+      ]
     case statusCodes.forbidden:
-      return 'Forbidden'
+      return [
+        'Forbidden',
+        'Sorry, you do not have permission to view this page',
+        'If you think you should have access, contact your administrator.'
+      ]
     case statusCodes.unauthorized:
-      return 'Unauthorized'
+      return [
+        'Unauthorized',
+        'Sorry, you do not have permission to view this page',
+        'If you think you should have access, contact your administrator.'
+      ]
     case statusCodes.badRequest:
-      return 'Bad Request'
+      return [
+        'Bad request',
+        'The request you made is invalid',
+        'If you think this is an error, contact your administrator.'
+      ]
     default:
-      return 'Something went wrong'
+      return [
+        'Something went wrong',
+        'Sorry, there has been an unexpected error',
+        'Please try again later or contact your administrator.'
+      ]
   }
 }
 
@@ -23,7 +43,7 @@ export function catchAll(request, h) {
   }
 
   const statusCode = response.output.statusCode
-  const errorMessage = statusCodeMessage(statusCode)
+  const [errorTitle, errorHeading, errorMessage] = statusCodeDetails(statusCode)
 
   if (statusCode >= statusCodes.internalServerError) {
     request.logger.error(response?.stack)
@@ -31,8 +51,8 @@ export function catchAll(request, h) {
 
   return h
     .view('error/index', {
-      pageTitle: errorMessage,
-      heading: statusCode,
+      pageTitle: errorTitle,
+      heading: errorHeading,
       message: errorMessage
     })
     .code(statusCode)

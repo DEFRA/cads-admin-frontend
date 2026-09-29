@@ -3,27 +3,51 @@ import nunjucks from 'nunjucks'
 import hapiVision from '@hapi/vision'
 import { fileURLToPath } from 'node:url'
 
-import { config } from '../config.js'
+import { getConfig } from '../config.js'
 import { context } from './context/context.js'
 import * as filters from './filters/filters.js'
 import * as globals from './globals/globals.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
-const nunjucksEnvironment = nunjucks.configure(
-  [
-    'node_modules/govuk-frontend/dist/',
-    path.resolve(dirname, '../../server/common/templates'),
-    path.resolve(dirname, '../../server/common/components')
-  ],
-  {
-    autoescape: true,
-    throwOnUndefined: false,
-    trimBlocks: true,
-    lstripBlocks: true,
-    watch: config.get('nunjucks.watch'),
-    noCache: config.get('nunjucks.noCache')
+
+// Lazily created shared environment instance
+let nunjucksEnvironment = null
+
+export function getNunjucksEnvironment() {
+  if (nunjucksEnvironment) {
+    return nunjucksEnvironment
   }
-)
+
+  const config = getConfig()
+
+  nunjucksEnvironment = nunjucks.configure(
+    [
+      'node_modules/govuk-frontend/dist/',
+      path.resolve(dirname, '../../server/common/templates'),
+      path.resolve(dirname, '../../server/common/components')
+    ],
+    {
+      autoescape: true,
+      throwOnUndefined: false,
+      trimBlocks: true,
+      lstripBlocks: true,
+      watch: config.get('nunjucks.watch'),
+      noCache: config.get('nunjucks.noCache')
+    }
+  )
+
+  // Register globals
+  Object.entries(globals).forEach(([name, value]) => {
+    nunjucksEnvironment.addGlobal(name, value)
+  })
+
+  // Register filters
+  Object.entries(filters).forEach(([name, filter]) => {
+    nunjucksEnvironment.addFilter(name, filter)
+  })
+
+  return nunjucksEnvironment
+}
 
 export const nunjucksConfig = {
   plugin: hapiVision,
@@ -37,19 +61,11 @@ export const nunjucksConfig = {
       }
     },
     compileOptions: {
-      environment: nunjucksEnvironment
+      environment: getNunjucksEnvironment()
     },
     relativeTo: path.resolve(dirname, '../..'),
-    path: 'server/routes',
-    isCached: config.get('isProduction'),
+    path: 'server',
+    isCached: getConfig().get('isProduction'),
     context
   }
 }
-
-Object.entries(globals).forEach(([name, global]) => {
-  nunjucksEnvironment.addGlobal(name, global)
-})
-
-Object.entries(filters).forEach(([name, filter]) => {
-  nunjucksEnvironment.addFilter(name, filter)
-})
