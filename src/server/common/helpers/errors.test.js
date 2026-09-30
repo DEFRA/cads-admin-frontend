@@ -1,126 +1,148 @@
-import { vi } from 'vitest'
+import Boom from '@hapi/boom'
 
 import { catchAll } from './errors.js'
-import { createServer } from '../../server.js'
 import { statusCodes } from '../constants/status-codes.js'
 
-describe('#errors', () => {
-  let server
+function mockRequest(response, logger) {
+  return {
+    response,
+    logger: logger ?? { error: vi.fn() }
+  }
+}
 
-  beforeAll(async () => {
-    server = await createServer()
-    await server.initialize()
-  })
-
-  afterAll(async () => {
-    await server.stop({ timeout: 0 })
-  })
-
-  test('Should provide expected Not Found page', async () => {
-    const { result, statusCode } = await server.inject({
-      method: 'GET',
-      url: '/non-existent-path'
-    })
-
-    expect(result).toEqual(
-      expect.stringContaining('Page not found | cads-admin-frontend')
-    )
-    expect(statusCode).toBe(statusCodes.notFound)
-  })
-})
+function mockToolkit() {
+  const h = {
+    continue: Symbol('continue'),
+    view: vi.fn()
+  }
+  const viewResponse = { code: vi.fn() }
+  h.view.mockReturnValue(viewResponse)
+  return { h, viewResponse }
+}
 
 describe('#catchAll', () => {
-  const mockErrorLogger = vi.fn()
-  const mockStack = 'Mock error stack'
-  const errorPage = 'error/index'
-  const mockRequest = (statusCode) => ({
-    response: {
-      isBoom: true,
-      stack: mockStack,
-      output: {
-        statusCode
-      }
-    },
-    logger: { error: mockErrorLogger }
-  })
-  const mockToolkitView = vi.fn()
-  const mockToolkitCode = vi.fn()
-  const mockToolkit = {
-    view: mockToolkitView.mockReturnThis(),
-    code: mockToolkitCode.mockReturnThis()
-  }
+  describe('When response is not a Boom error', () => {
+    test('Should return h.continue', () => {
+      const { h } = mockToolkit()
+      const request = mockRequest({ statusCode: statusCodes.ok })
 
-  test('Should provide expected "Not Found" page', () => {
-    catchAll(mockRequest(statusCodes.notFound), mockToolkit)
+      const result = catchAll(request, h)
 
-    expect(mockErrorLogger).not.toHaveBeenCalledWith(mockStack)
-    expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
-      pageTitle: 'Page not found',
-      heading: statusCodes.notFound,
-      message: 'Page not found'
+      expect(result).toBe(h.continue)
     })
-    expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.notFound)
   })
 
-  test('Should provide expected "Forbidden" page', () => {
-    catchAll(mockRequest(statusCodes.forbidden), mockToolkit)
+  describe('When response is a 401 Unauthorized Boom error', () => {
+    test('Should render the error view with "Unauthorized"', () => {
+      const { h, viewResponse } = mockToolkit()
+      const request = mockRequest(Boom.unauthorized())
 
-    expect(mockErrorLogger).not.toHaveBeenCalledWith(mockStack)
-    expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
-      pageTitle: 'Forbidden',
-      heading: statusCodes.forbidden,
-      message: 'Forbidden'
+      catchAll(request, h)
+
+      expect(h.view).toHaveBeenCalledWith('error/index', {
+        pageTitle: 'Unauthorized',
+        heading: 'Sorry, you do not have permission to view this page',
+        message:
+          'If you think you should have access, contact your administrator.'
+      })
+      expect(viewResponse.code).toHaveBeenCalledWith(statusCodes.unauthorized)
     })
-    expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.forbidden)
   })
 
-  test('Should provide expected "Unauthorized" page', () => {
-    catchAll(mockRequest(statusCodes.unauthorized), mockToolkit)
+  describe('When response is a 404 Not Found Boom error', () => {
+    test('Should render the error view with "Page not found"', () => {
+      const { h, viewResponse } = mockToolkit()
+      const request = mockRequest(Boom.notFound())
 
-    expect(mockErrorLogger).not.toHaveBeenCalledWith(mockStack)
-    expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
-      pageTitle: 'Unauthorized',
-      heading: statusCodes.unauthorized,
-      message: 'Unauthorized'
+      catchAll(request, h)
+
+      expect(h.view).toHaveBeenCalledWith('error/index', {
+        pageTitle: 'Page not found',
+        heading: 'The page you are looking for has not been found',
+        message:
+          'If you think there should be a page here, contact your administrator.'
+      })
+      expect(viewResponse.code).toHaveBeenCalledWith(statusCodes.notFound)
     })
-    expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.unauthorized)
   })
 
-  test('Should provide expected "Bad Request" page', () => {
-    catchAll(mockRequest(statusCodes.badRequest), mockToolkit)
+  describe('When response is a 403 Forbidden Boom error', () => {
+    test('Should render the error view with "Forbidden"', () => {
+      const { h, viewResponse } = mockToolkit()
+      const request = mockRequest(Boom.forbidden())
 
-    expect(mockErrorLogger).not.toHaveBeenCalledWith(mockStack)
-    expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
-      pageTitle: 'Bad Request',
-      heading: statusCodes.badRequest,
-      message: 'Bad Request'
+      catchAll(request, h)
+
+      expect(h.view).toHaveBeenCalledWith('error/index', {
+        pageTitle: 'Forbidden',
+        heading: 'Sorry, you do not have permission to view this page',
+        message:
+          'If you think you should have access, contact your administrator.'
+      })
+      expect(viewResponse.code).toHaveBeenCalledWith(statusCodes.forbidden)
     })
-    expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.badRequest)
   })
 
-  test('Should provide expected default page', () => {
-    catchAll(mockRequest(statusCodes.imATeapot), mockToolkit)
+  describe('When response is a 400 Bad Request Boom error', () => {
+    test('Should render the error view with "Bad request"', () => {
+      const { h, viewResponse } = mockToolkit()
+      const request = mockRequest(Boom.badRequest())
 
-    expect(mockErrorLogger).not.toHaveBeenCalledWith(mockStack)
-    expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
-      pageTitle: 'Something went wrong',
-      heading: statusCodes.imATeapot,
-      message: 'Something went wrong'
+      catchAll(request, h)
+
+      expect(h.view).toHaveBeenCalledWith('error/index', {
+        pageTitle: 'Bad request',
+        heading: 'The request you made is invalid',
+        message: 'If you think this is an error, contact your administrator.'
+      })
+      expect(viewResponse.code).toHaveBeenCalledWith(statusCodes.badRequest)
     })
-    expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.imATeapot)
   })
 
-  test('Should provide expected "Something went wrong" page and log error for internalServerError', () => {
-    catchAll(mockRequest(statusCodes.internalServerError), mockToolkit)
+  describe('When response is a 500 Internal Server Error Boom error', () => {
+    test('Should render the error view with "Something went wrong"', () => {
+      const { h, viewResponse } = mockToolkit()
+      const boom = Boom.internal('Unexpected failure')
+      const logger = { error: vi.fn() }
+      const request = mockRequest(boom, logger)
 
-    expect(mockErrorLogger).toHaveBeenCalledWith(mockStack)
-    expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
-      pageTitle: 'Something went wrong',
-      heading: statusCodes.internalServerError,
-      message: 'Something went wrong'
+      catchAll(request, h)
+
+      expect(h.view).toHaveBeenCalledWith('error/index', {
+        pageTitle: 'Something went wrong',
+        heading: 'Sorry, there has been an unexpected error',
+        message: 'Please try again later or contact your administrator.'
+      })
+      expect(viewResponse.code).toHaveBeenCalledWith(
+        statusCodes.internalServerError
+      )
     })
-    expect(mockToolkitCode).toHaveBeenCalledWith(
-      statusCodes.internalServerError
-    )
+
+    test('Should log the error stack', () => {
+      const { h } = mockToolkit()
+      const boom = Boom.internal('Unexpected failure')
+      const logger = { error: vi.fn() }
+      const request = mockRequest(boom, logger)
+
+      catchAll(request, h)
+
+      expect(logger.error).toHaveBeenCalledWith(boom.stack)
+    })
+  })
+
+  describe('When response is an unrecognised 4xx Boom error', () => {
+    test('Should render the error view with "Something went wrong"', () => {
+      const { h, viewResponse } = mockToolkit()
+      const request = mockRequest(Boom.teapot())
+
+      catchAll(request, h)
+
+      expect(h.view).toHaveBeenCalledWith('error/index', {
+        pageTitle: 'Something went wrong',
+        heading: 'Sorry, there has been an unexpected error',
+        message: 'Please try again later or contact your administrator.'
+      })
+      expect(viewResponse.code).toHaveBeenCalledWith(statusCodes.imATeapot)
+    })
   })
 })

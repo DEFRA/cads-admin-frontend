@@ -21,9 +21,7 @@ RUN npm run build:frontend
 CMD [ "npm", "run", "docker:dev" ]
 
 FROM development AS production_build
-
 ENV NODE_ENV=production
-
 RUN npm run build:frontend
 
 FROM defradigital/node:${PARENT_VERSION} AS production
@@ -32,17 +30,17 @@ LABEL uk.gov.defra.ffc.parent-image=defradigital/node:${PARENT_VERSION}
 
 ENV TZ="Europe/London"
 
-# Add curl to template.
-# CDP PLATFORM HEALTHCHECK REQUIREMENT
 USER root
-RUN apk add --no-cache curl
+RUN apk update \
+    && apk add curl \
+    && apk cache clean
 USER node
 
 COPY --from=production_build /home/node/package*.json ./
 COPY --from=production_build /home/node/src ./src/
 COPY --from=production_build /home/node/.public/ ./.public/
 
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
 ARG PORT
 ENV PORT=${PORT}

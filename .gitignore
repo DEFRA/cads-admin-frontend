@@ -1,6 +1,8 @@
 .DS_Store
 .npm/
-.vscode
+.vscode/*
+!.vscode/tasks.json
+!.vscode/README.md
 .idea
 .public
 node_modules

@@ -1,0 +1,25 @@
+name: 'cads-admin-frontend'
+services:
+  cads-admin-frontend:
+    container_name: "cads-admin-frontend"
+    image: cads-admin-frontend
+    build:
+      context: .
+      target: development
+    ports:
+      - '3010:3010'
+    depends_on: []
+    env_file:
+      - .env
+      - .env.docker
+    environment:
+      PORT: 3010
+      NODE_ENV: development
+      REDIS_HOST: cads-redis
+      USE_SINGLE_INSTANCE_CACHE: true
+    networks:
+      - cads-network
+
+networks:
+  cads-network:
+    external: true
