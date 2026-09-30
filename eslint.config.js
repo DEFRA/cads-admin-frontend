@@ -63,13 +63,7 @@ export default [
     ...packageJson.configs.recommended,
     rules: {
       ...packageJson.configs.recommended.rules,
-      'package-json/restrict-dependency-ranges': [
-        'error',
-        {
-          forDependencyTypes: ['dependencies', 'devDependencies'],
-          rangeType: 'pin'
-        }
-      ]
+      'package-json/restrict-dependency-ranges': 'off'
     }
   },
   {
