@@ -146,6 +146,9 @@ REDIS_TLS=false
 
 # CADS CDS: Backend
 CADS_CDS_BACKEND_URL=http://localhost:5555
+
+# CADS BRIDGE: Backend
+CADS_BRIDGE_BACKEND_URL=http://localhost:5550
 ```
 
 **Note.** The Redis password must be complex and a minimum of 32 chars.

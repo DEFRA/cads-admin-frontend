@@ -130,6 +130,12 @@ function buildSchema() {
       default: 'http://localhost:5555',
       env: 'CADS_CDS_BACKEND_URL'
     },
+    cadsBridgeBackendUrl: {
+      doc: 'CADS Bridge Backend API base URL',
+      format: String,
+      default: 'http://localhost:5550',
+      env: 'CADS_BRIDGE_BACKEND_URL'
+    },
     log: buildLogSchema({ isProduction }),
     session: buildSessionSchema({ isProduction }),
     redis: buildRedisSchema({ isProduction }),
