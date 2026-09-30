@@ -1,6 +1,6 @@
 {
   "name": "cads-admin-frontend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CADS Admin Monitoring",
   "license": "OGL-UK-3.0",
   "author": "Defra DDTS",
@@ -36,8 +36,8 @@
     "tmp": "0.2.7"
   },
   "dependencies": {
-    "@defra/cdp-auditing": "^0.6.1",
-    "@defra/cdp-metrics": "^0.6.0",
+    "@defra/cdp-auditing": "0.6.1",
+    "@defra/cdp-metrics": "0.6.0",
     "@defra/hapi-secure-context": "0.1.3",
     "@defra/hapi-tracing": "1.30.0",
     "@elastic/ecs-pino-format": "1.5.0",
@@ -66,14 +66,14 @@
     "ioredis": "5.6.1",
     "jsdom": "29.0.1",
     "lodash": "4.18.1",
-    "luxon": "^3.7.2",
+    "luxon": "3.7.2",
     "node-fetch": "3.3.2",
     "nunjucks": "3.2.4",
     "openid-client": "5.6.4",
-    "pino": "^10.3.1",
-    "pino-pretty": "^13.1.3",
-    "semver": "^7.7.2",
-    "undici": "^7.24.5"
+    "pino": "10.3.1",
+    "pino-pretty": "13.1.3",
+    "semver": "7.7.2",
+    "undici": "7.24.5"
   },
   "devDependencies": {
     "@babel/preset-env": "7.27.2",
