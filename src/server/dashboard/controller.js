@@ -3,15 +3,7 @@ export const dashboardController = {
     return h.view('dashboard/index', {
       pageTitle: 'Dashboard',
       heading: 'Dashboard',
-      breadcrumbs: [
-        {
-          text: 'Home',
-          href: '/'
-        },
-        {
-          text: 'Dashboard'
-        }
-      ],
+      breadcrumbs: [],
       viewModel: {
       }
     })

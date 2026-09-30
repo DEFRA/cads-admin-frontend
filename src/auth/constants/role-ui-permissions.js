@@ -3,7 +3,7 @@
 import { roleTypes } from './roles.js'
 
 const specialUiRolePermissions = {
-  [roleTypes.miAdmin]: []
+  [roleTypes.cadsAdminSuperuser]: []
 }
 
 export { specialUiRolePermissions }

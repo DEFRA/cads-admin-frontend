@@ -122,9 +122,14 @@ OIDC_WELL_KNOWN_URL=http://localhost:5557/.well-known/openid-configuration
 OIDC_AUTHORIZATION_ENDPOINT=http://localhost:5557/connect/authorize
 OIDC_END_SESSION_ENDPOINT=http://localhost:5557/connect/endsession
 
+# Resources
+USE_SIMPLE_SCOPES=true
+
 ## Resource: CADS CDS
 AZURE_CLIENT_CADS_CDS_ID=local-cads-cds
-USE_SIMPLE_SCOPES=true
+
+## Resource: CADS BRIDGE
+AZURE_CLIENT_CADS_BRIDGE_ID=local-cads-bridge
 
 # Session configuration
 SESSION_CACHE_ENGINE=redis
@@ -140,7 +145,7 @@ USE_SINGLE_INSTANCE_CACHE=true
 REDIS_TLS=false
 
 # CADS CDS: Backend
-CADS_BACKEND_URL=http://localhost:5555
+CADS_CDS_BACKEND_URL=http://localhost:5555
 ```
 
 **Note.** The Redis password must be complex and a minimum of 32 chars.
@@ -242,7 +247,7 @@ npm run dev
 
 **CADS CDS: Azure AD**
 
-- `admin.db.execute`
+- `db.admin.execute`
 - `admin.s3.manager`
 - `admin.queue.manager`
 
@@ -266,7 +271,7 @@ npm run dev
 - Roles: cads-admin-superuser
 - Refresh: offline access
 - API permissions to `O365-CADS-ADMIN-DEV` (`XXXX`) as an authorised client app to `O365-CADS-CDS-DEV` (`e5acc07b-a696-4998-9bb6-93573ec237b3`)
-  - With scope: `api://e5acc07b-a696-4998-9bb6-93573ec237b3/admin.db.execute"`
+  - With scope: `api://e5acc07b-a696-4998-9bb6-93573ec237b3/db.admin.execute"`
   - With scope: `api://e5acc07b-a696-4998-9bb6-93573ec237b3/admin.s3.manager"`
   - With scope: `api://e5acc07b-a696-4998-9bb6-93573ec237b3/admin.queue.manager"`
 - API permissions to `O365-CADS-ADMIN-DEV` (`XXXX`) as an authorised client app to `O365-CADS-BRIDGE-DEV` (`XXXX`)
@@ -277,7 +282,7 @@ npm run dev
 
 - Name: O365-CADS-CDS-DEV
 - ClientId: e5acc07b-a696-4998-9bb6-93573ec237b3
-- Scope: admin.db.execute, admin.s3.manager, admin.queue.manager
+- Scope: db.admin.execute, admin.s3.manager, admin.queue.manager
 
 **CADS BRIDGE**
 

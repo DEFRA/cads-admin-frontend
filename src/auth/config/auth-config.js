@@ -2,16 +2,33 @@ import { getConfig } from '../../config/config.js'
 import { resourceScopes } from '../constants/resource-scopes.js'
 
 function buildCadsCdsScopes(cadsCdsClientId, useSimpleScopes) {
+  const scopes = [
+    resourceScopes.cadsCds.dbAdminExecute,
+    resourceScopes.cadsCds.adminS3Manager,
+    resourceScopes.cadsCds.adminQueueManager
+  ]
   return useSimpleScopes
-    ? [resourceScopes.cadsCds.reportsRead]
-    : [`api://${cadsCdsClientId}/${resourceScopes.cadsCds.reportsRead}`]
+    ? scopes
+    : scopes.map(scope => `api://${cadsCdsClientId}/${scope}`)
+}
+
+function buildCadsBridgeScopes(cadsBridgeClientId, useSimpleScopes) {
+  const scopes = [
+    resourceScopes.cadsBridge.adminS3Manager,
+    resourceScopes.cadsBridge.adminQueueManager
+  ]
+  return useSimpleScopes
+    ? scopes
+    : scopes.map(scope => `api://${cadsBridgeClientId}/${scope}`)
 }
 
 export function getAuthConfig() {
   const config = getConfig()
-  const cadsCdsClientId = config.get('azure.cadsCdsClientId')
   const useSimpleScopes = config.get('azure.useSimpleScopes')
+  const cadsCdsClientId = config.get('azure.cadsCdsClientId')
   const cadsCdsScopes = buildCadsCdsScopes(cadsCdsClientId, useSimpleScopes)
+  const cadsBridgeClientId = config.get('azure.cadsBridgeClientId')
+  const cadsBridgeScopes = buildCadsBridgeScopes(cadsBridgeClientId, useSimpleScopes)
 
   return {
     clientId: config.get('oidc.clientId'),
@@ -32,7 +49,8 @@ export function getAuthConfig() {
       'profile',
       'email',
       'offline_access',
-      ...cadsCdsScopes
+      ...cadsCdsScopes,
+      ...cadsBridgeScopes
     ].join(' ')
   }
 }

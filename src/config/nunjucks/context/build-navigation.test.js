@@ -35,6 +35,21 @@ describe('#buildNavigation', () => {
       },
       {
         current: false,
+        text: 'DB Monitoring',
+        href: '/db-monitoring'
+      },
+      {
+        current: false,
+        text: 'S3 Monitoring',
+        href: '/s3-monitoring'
+      },
+      {
+        current: false,
+        text: 'SQS Monitoring',
+        href: '/sqs-monitoring'
+      },
+      {
+        current: false,
         text: 'Sign out',
         href: '/logout'
       }

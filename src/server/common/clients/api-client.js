@@ -1,18 +1,23 @@
 import { getSession } from '../../../auth/session-store.js'
-import { getConfig } from '../../../config/config.js'
 import { withTraceId } from '@defra/hapi-tracing'
 import { getTracingHeaderName } from '../helpers/request-tracing.js'
 import Boom from '@hapi/boom'
 
-export function createApiClient(request) {
+/*
+  Usage:
+  const cdsClient = createApiClient(request, config.get('cadsCdsBackendUrl'))
+  const bridgeClient = createApiClient(request, config.get('cadsBridgeBackendUrl'))
+*/
+export function createApiClient(request, backendUrl) {
   return {
     /** @template T */
-    get: (path) => callApi(request, path, { method: 'GET' }),
+    get: (path) => callApi(request, backendUrl, path, { method: 'GET' }),
 
     /** @template T */
     post: (path, body, stream = false) =>
       callApi(
         request,
+        backendUrl,
         path,
         {
           method: 'POST',
@@ -23,27 +28,27 @@ export function createApiClient(request) {
 
     /** @template T */
     put: (path, body) =>
-      callApi(request, path, {
+      callApi(request, backendUrl, path, {
         method: 'PUT',
         body: JSON.stringify(body)
       }),
 
     /** @template T */
-    delete: (path) => callApi(request, path, { method: 'DELETE' })
+    delete: (path) => callApi(request, backendUrl, path, { method: 'DELETE' })
   }
 }
 
 /**
  * @template T
  * @param {import('@hapi/hapi').Request} request
+ * @param {string} backendUrl
  * @param {string} path
  * @param {RequestInit} options
  * @param {boolean} [stream=false]
  * @returns {Promise<T>}
  */
-async function callApi(request, path, options, stream = false) {
-  const config = getConfig()
-  const url = new URL(path, config.get('cadsBackendUrl')).href
+async function callApi(request, backendUrl, path, options, stream = false) {
+  const url = new URL(path, backendUrl).href
 
   // Try to get session, but don't fail if missing
   const sid = request.state.sid?.sessionId
