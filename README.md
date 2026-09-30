@@ -241,6 +241,7 @@ During local development, you should run this service using:
 ```
 npm run dev
 ```
+
 ## Auth configuration: Resources, roles and permissions
 
 ### OAuth resources
@@ -260,7 +261,9 @@ npm run dev
 ## Azure AD Configuration
 
 ### DEV
+
 **CADS ADMIN MONITORING**
+
 - Name: O365-CADS-ADMIN-DEV
 - ClientId: XXXX
 - Secret: XYZ

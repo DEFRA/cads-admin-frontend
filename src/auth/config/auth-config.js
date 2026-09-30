@@ -9,7 +9,7 @@ function buildCadsCdsScopes(cadsCdsClientId, useSimpleScopes) {
   ]
   return useSimpleScopes
     ? scopes
-    : scopes.map(scope => `api://${cadsCdsClientId}/${scope}`)
+    : scopes.map((scope) => `api://${cadsCdsClientId}/${scope}`)
 }
 
 function buildCadsBridgeScopes(cadsBridgeClientId, useSimpleScopes) {
@@ -19,7 +19,7 @@ function buildCadsBridgeScopes(cadsBridgeClientId, useSimpleScopes) {
   ]
   return useSimpleScopes
     ? scopes
-    : scopes.map(scope => `api://${cadsBridgeClientId}/${scope}`)
+    : scopes.map((scope) => `api://${cadsBridgeClientId}/${scope}`)
 }
 
 export function getAuthConfig() {
@@ -28,7 +28,10 @@ export function getAuthConfig() {
   const cadsCdsClientId = config.get('azure.cadsCdsClientId')
   const cadsCdsScopes = buildCadsCdsScopes(cadsCdsClientId, useSimpleScopes)
   const cadsBridgeClientId = config.get('azure.cadsBridgeClientId')
-  const cadsBridgeScopes = buildCadsBridgeScopes(cadsBridgeClientId, useSimpleScopes)
+  const cadsBridgeScopes = buildCadsBridgeScopes(
+    cadsBridgeClientId,
+    useSimpleScopes
+  )
 
   return {
     clientId: config.get('oidc.clientId'),

@@ -32,7 +32,9 @@ describe('#s3MonitoringDashboardController', () => {
     })
 
     test('Should show S3 Monitoring page', async () => {
-      expect(response.result).toEqual(expect.stringContaining('S3 Monitoring |'))
+      expect(response.result).toEqual(
+        expect.stringContaining('S3 Monitoring |')
+      )
       expect(response.statusCode).toBe(statusCodes.ok)
     })
   })

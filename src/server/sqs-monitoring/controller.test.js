@@ -32,7 +32,9 @@ describe('#sqsMonitoringDashboardController', () => {
     })
 
     test('Should show SQS Monitoring page', async () => {
-      expect(response.result).toEqual(expect.stringContaining('SQS Monitoring |'))
+      expect(response.result).toEqual(
+        expect.stringContaining('SQS Monitoring |')
+      )
       expect(response.statusCode).toBe(statusCodes.ok)
     })
   })

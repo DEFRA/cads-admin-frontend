@@ -12,8 +12,7 @@ export const sqsMonitoringDashboardController = {
           text: 'SQS Monitoring'
         }
       ],
-      viewModel: {
-      }
+      viewModel: {}
     })
   }
 }

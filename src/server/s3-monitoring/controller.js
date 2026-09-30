@@ -12,8 +12,7 @@ export const s3MonitoringDashboardController = {
           text: 'S3 Monitoring'
         }
       ],
-      viewModel: {
-      }
+      viewModel: {}
     })
   }
 }

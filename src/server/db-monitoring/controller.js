@@ -12,8 +12,7 @@ export const dbMonitoringDashboardController = {
           text: 'DB Monitoring'
         }
       ],
-      viewModel: {
-      }
+      viewModel: {}
     })
   }
 }

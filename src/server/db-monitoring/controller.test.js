@@ -32,7 +32,9 @@ describe('#dbMonitoringDashboardController', () => {
     })
 
     test('Should show DB Monitoring page', async () => {
-      expect(response.result).toEqual(expect.stringContaining('DB Monitoring |'))
+      expect(response.result).toEqual(
+        expect.stringContaining('DB Monitoring |')
+      )
       expect(response.statusCode).toBe(statusCodes.ok)
     })
   })

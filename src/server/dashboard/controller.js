@@ -4,8 +4,7 @@ export const dashboardController = {
       pageTitle: 'Dashboard',
       heading: 'Dashboard',
       breadcrumbs: [],
-      viewModel: {
-      }
+      viewModel: {}
     })
   }
 }
