@@ -17,7 +17,7 @@ export const dbMonitoringDashboard = {
               mode: 'try'
             },
             pre: [
-              authRequired/*,
+              authRequired /*,
               requireRole(roleTypes.cadsAdminSuperuser)*/
             ]
           },

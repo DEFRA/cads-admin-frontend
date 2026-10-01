@@ -17,7 +17,7 @@ export const dashboard = {
               mode: 'try'
             },
             pre: [
-              authRequired/*,
+              authRequired /*,
               requireRole(roleTypes.cadsAdminSuperuser)*/
             ]
           },

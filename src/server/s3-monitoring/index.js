@@ -17,7 +17,7 @@ export const s3MonitoringDashboard = {
               mode: 'try'
             },
             pre: [
-              authRequired/*,
+              authRequired /*,
               requireRole(roleTypes.cadsAdminSuperuser)*/
             ]
           },

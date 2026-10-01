@@ -17,7 +17,7 @@ export const sqsMonitoringDashboard = {
               mode: 'try'
             },
             pre: [
-              authRequired/*,
+              authRequired /*,
               requireRole(roleTypes.cadsAdminSuperuser)*/
             ]
           },
