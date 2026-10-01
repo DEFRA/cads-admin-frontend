@@ -34,6 +34,11 @@ vi.mock('../../../src/auth/oidc-client.js', () => ({
   getOidcClient: vi.fn(() => mockOidcClient)
 }))
 
+// Mock auth config (scope sent on refresh)
+vi.mock('../../../src/auth/config/auth-config.js', () => ({
+  getAuthConfig: vi.fn(() => ({ exchangeScope: 'openid api://cds/scope' }))
+}))
+
 // Mock roles + permissions
 vi.mock('../../../src/auth/constants/roles.js', () => ({
   roleTypes: { miAdmin: 'MI_ADMIN' }
@@ -149,7 +154,9 @@ describe('sessionMiddleware', () => {
 
     const result = await sessionMiddleware(request, h)
 
-    expect(mockRefresh).toHaveBeenCalledWith('rtoken1')
+    expect(mockRefresh).toHaveBeenCalledWith('rtoken1', {
+      exchangeBody: { scope: 'openid api://cds/scope' }
+    })
     expect(mockSetSession).toHaveBeenCalled()
     expect(request.auth.credentials.user.permissions).toEqual([])
     expect(result).toBe('continue')

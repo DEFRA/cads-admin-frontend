@@ -3,6 +3,7 @@ import { generators } from 'openid-client'
 import { getOidcClient } from './oidc-client.js'
 import { dropSession, getSession, setSession } from './session-store.js'
 import { getRequestOrigin } from './helpers/request-origin.js'
+import { extractRoles } from './helpers/extract-roles.js'
 import crypto from 'node:crypto'
 
 /**
@@ -111,7 +112,7 @@ export const loginRoutes = [
       // Use the subject (sub) as the session ID
       const sessionId = crypto.randomUUID()
 
-      const roles = Array.isArray(claims.roles) ? claims.roles : []
+      const roles = extractRoles(claims)
       const permissions = []
 
       // Store session in Redis

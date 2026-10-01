@@ -1,6 +1,8 @@
 import { getOidcClient } from './oidc-client.js'
 import { TokenSet } from 'openid-client'
 import { getSession, setSession, dropSession } from './session-store.js'
+import { getAuthConfig } from './config/auth-config.js'
+import { extractRoles } from './helpers/extract-roles.js'
 
 export async function sessionMiddleware(request, h) {
   if (shouldSkipRequest(request)) {
@@ -82,7 +84,9 @@ async function refreshTokenIfNeeded(session, sessionId, request) {
 
   try {
     const oidcClient = getOidcClient()
-    const refreshedToken = await oidcClient.refresh(tokenSet.refresh_token)
+    const refreshedToken = await oidcClient.refresh(tokenSet.refresh_token, {
+      exchangeBody: { scope: getAuthConfig().exchangeScope }
+    })
 
     refreshedToken.refresh_token =
       refreshedToken.refresh_token ?? tokenSet.refresh_token
@@ -90,7 +94,6 @@ async function refreshTokenIfNeeded(session, sessionId, request) {
     tokenSet = refreshedToken
     user = refreshedToken.claims()
 
-    const refreshedRoles = user.roles
     permissions = []
 
     // Save updated session
@@ -98,9 +101,10 @@ async function refreshTokenIfNeeded(session, sessionId, request) {
       sessionId,
       userSub: session.userSub,
       tokenSet,
+      resourceTokens: session.resourceTokens,
       user: {
         ...user,
-        refreshedRoles,
+        roles: extractRoles(user),
         permissions
       }
     })
