@@ -1,7 +1,7 @@
 import { dbMonitoringDashboardController } from './controller.js'
 import { authRequired } from '../../auth/auth-required.js'
-import { requireRole } from '../../auth/require-role.js'
-import { roleTypes } from '../../auth/constants/roles.js'
+//import { requireRole } from '../../auth/require-role.js'
+//import { roleTypes } from '../../auth/constants/roles.js'
 
 export const dbMonitoringDashboard = {
   plugin: {
