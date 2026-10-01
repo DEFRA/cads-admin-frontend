@@ -33,7 +33,7 @@ describe('auth-config', () => {
 
   it('builds full API scope when useSimpleScopes=false', () => {
     const cfg = getAuthConfig()
-    expect(cfg.scope).toContain('api://abc123/db.admin.execute')
+    expect(cfg.scope).toContain('api://abc123/admin.db.execute')
     expect(cfg.scope).toContain('api://abc123/admin.s3.manager')
     expect(cfg.scope).toContain('api://abc123/admin.queue.manager')
   })
@@ -50,7 +50,7 @@ describe('auth-config', () => {
     })
 
     const cfg = getAuthConfig()
-    expect(cfg.scope).toContain('db.admin.execute')
+    expect(cfg.scope).toContain('admin.db.execute')
     expect(cfg.scope).not.toContain('api://')
   })
 
