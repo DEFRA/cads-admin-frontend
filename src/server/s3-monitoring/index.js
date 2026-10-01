@@ -1,5 +1,7 @@
 import { s3MonitoringDashboardController } from './controller.js'
 import { authRequired } from '../../auth/auth-required.js'
+//import { requireRole } from '../../auth/require-role.js'
+//import { roleTypes } from '../../auth/constants/roles.js'
 
 export const s3MonitoringDashboard = {
   plugin: {
@@ -14,7 +16,10 @@ export const s3MonitoringDashboard = {
               strategy: 'session',
               mode: 'try'
             },
-            pre: [authRequired]
+            pre: [
+              authRequired /*,
+              requireRole(roleTypes.cadsAdminSuperuser)*/
+            ]
           },
           ...s3MonitoringDashboardController
         }
