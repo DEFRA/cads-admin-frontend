@@ -95,10 +95,14 @@ export const loginRoutes = [
 
       // Exchange the code for tokens
       const redirectUri = `${getRequestOrigin(request)}${authConfig.redirectPath}`
-      const tokenSet = await oidcClient.callback(redirectUri, callbackParams, {
-        state: oidcState,
-        nonce: oidcNonce
-      })
+      // Entra requires an explicit scope on the code exchange when the
+      // authorize request spans more than one resource (AADSTS28003)
+      const tokenSet = await oidcClient.callback(
+        redirectUri,
+        callbackParams,
+        { state: oidcState, nonce: oidcNonce },
+        { exchangeBody: { scope: authConfig.scope } }
+      )
 
       // Extract user claims from ID token
       const claims = tokenSet.claims()

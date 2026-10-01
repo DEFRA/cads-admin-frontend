@@ -222,6 +222,40 @@ describe('GET /login', () => {
     expect(res.headers.location).toBe('/report/holding_summary')
   })
 
+  it('sends the configured scope on the token exchange', async () => {
+    const callback = vi.fn().mockResolvedValue({
+      claims: () => ({ sub: '12345' })
+    })
+    getOidcClient.mockResolvedValue({
+      callbackParams: vi.fn().mockReturnValue({ state: 'ABC' }),
+      callback
+    })
+
+    getSession.mockResolvedValue({
+      oidcState: 'ABC',
+      oidcNonce: 'XYZ',
+      redirectTo: '/dashboard'
+    })
+
+    server = await createTestServer(loginRoutes)
+
+    await server.inject({
+      method: 'GET',
+      url: '/auth/callback?code=123',
+      auth: {
+        strategy: 'session',
+        credentials: { sessionId: 'oidc:STATE' }
+      }
+    })
+
+    expect(callback).toHaveBeenCalledWith(
+      expect.stringContaining('/auth/callback'),
+      { state: 'ABC' },
+      { state: 'ABC', nonce: 'XYZ' },
+      { exchangeBody: { scope: 'openid profile email' } }
+    )
+  })
+
   it('redirects to auth config default url when session value missing', async () => {
     getOidcClient.mockResolvedValue({
       callbackParams: vi.fn().mockReturnValue({
