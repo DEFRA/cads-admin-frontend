@@ -1,14 +1,14 @@
 import { buildRedisClient } from '../server/common/helpers/redis-client.js'
 import { getConfig } from '../config/config.js'
 
-// Create a dedicated Redis client for auth sessions
-const redisClient = null
+// Dedicated Redis client for auth sessions, created once and reused
+let redisClient = null
 
 function getRedisClient() {
   if (!redisClient) {
     const config = getConfig()
     const redisConfig = config.get('redis')
-    return buildRedisClient(redisConfig)
+    redisClient = buildRedisClient(redisConfig)
   }
   return redisClient
 }

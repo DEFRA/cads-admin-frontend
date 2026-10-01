@@ -46,6 +46,13 @@ describe('auth-config', () => {
     expect(cfg.scope).toContain('api://abc456')
   })
 
+  it('requests only bridge scopes for the bridge token', () => {
+    const cfg = getAuthConfig()
+    expect(cfg.bridgeExchangeScope).toContain('offline_access')
+    expect(cfg.bridgeExchangeScope).toContain('api://abc456/admin.s3.manager')
+    expect(cfg.bridgeExchangeScope).not.toContain('api://abc123')
+  })
+
   it('builds simple scope when useSimpleScopes=true', () => {
     getConfig.mockReturnValue({
       get: vi.fn((key) => {

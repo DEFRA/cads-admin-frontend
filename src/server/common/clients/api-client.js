@@ -1,4 +1,4 @@
-import { getSession } from '../../../auth/session-store.js'
+import { getAccessToken } from '../../../auth/resource-tokens.js'
 import { withTraceId } from '@defra/hapi-tracing'
 import { getTracingHeaderName } from '../helpers/request-tracing.js'
 import Boom from '@hapi/boom'
@@ -6,12 +6,13 @@ import Boom from '@hapi/boom'
 /*
   Usage:
   const cdsClient = createApiClient(request, config.get('cadsCdsBackendUrl'))
-  const bridgeClient = createApiClient(request, config.get('cadsBridgeBackendUrl'))
+  const bridgeClient = createApiClient(request, config.get('cadsBridgeBackendUrl'), 'bridge')
 */
-export function createApiClient(request, backendUrl) {
+export function createApiClient(request, backendUrl, resource = 'cds') {
   return {
     /** @template T */
-    get: (path) => callApi(request, backendUrl, path, { method: 'GET' }),
+    get: (path) =>
+      callApi(request, backendUrl, path, { method: 'GET' }, false, resource),
 
     /** @template T */
     post: (path, body, stream = false) =>
@@ -23,18 +24,27 @@ export function createApiClient(request, backendUrl) {
           method: 'POST',
           body: JSON.stringify(body)
         },
-        stream
+        stream,
+        resource
       ),
 
     /** @template T */
     put: (path, body) =>
-      callApi(request, backendUrl, path, {
-        method: 'PUT',
-        body: JSON.stringify(body)
-      }),
+      callApi(
+        request,
+        backendUrl,
+        path,
+        {
+          method: 'PUT',
+          body: JSON.stringify(body)
+        },
+        false,
+        resource
+      ),
 
     /** @template T */
-    delete: (path) => callApi(request, backendUrl, path, { method: 'DELETE' })
+    delete: (path) =>
+      callApi(request, backendUrl, path, { method: 'DELETE' }, false, resource)
   }
 }
 
@@ -45,9 +55,17 @@ export function createApiClient(request, backendUrl) {
  * @param {string} path
  * @param {RequestInit} options
  * @param {boolean} [stream=false]
+ * @param {'cds' | 'bridge'} [resource='cds']
  * @returns {Promise<T>}
  */
-async function callApi(request, backendUrl, path, options, stream = false) {
+async function callApi(
+  request,
+  backendUrl,
+  path,
+  options,
+  stream = false,
+  resource = 'cds'
+) {
   const url = new URL(path, backendUrl).href
 
   // Try to get session, but don't fail if missing
@@ -55,8 +73,7 @@ async function callApi(request, backendUrl, path, options, stream = false) {
   let token = null
 
   if (sid) {
-    const session = await getSession(sid)
-    token = session?.tokenSet?.access_token || null
+    token = await getAccessToken(sid, resource)
   }
 
   const headers = withTraceId(getTracingHeaderName(), {

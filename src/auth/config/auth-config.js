@@ -52,6 +52,8 @@ export function getAuthConfig() {
     // Authorize request: all resources, so the user consents to everything once
     scope: [...oidcScopes, ...cadsCdsScopes, ...cadsBridgeScopes].join(' '),
     // Token request: Entra only accepts scopes for a single resource (AADSTS28000)
-    exchangeScope: [...oidcScopes, ...cadsCdsScopes].join(' ')
+    exchangeScope: [...oidcScopes, ...cadsCdsScopes].join(' '),
+    // Bridge token: requested separately via the refresh token
+    bridgeExchangeScope: ['offline_access', ...cadsBridgeScopes].join(' ')
   }
 }
