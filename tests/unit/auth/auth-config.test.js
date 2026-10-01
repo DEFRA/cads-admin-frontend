@@ -38,6 +38,14 @@ describe('auth-config', () => {
     expect(cfg.scope).toContain('api://abc123/admin.queue.manager')
   })
 
+  it('limits the token exchange scope to a single resource', () => {
+    const cfg = getAuthConfig()
+    expect(cfg.exchangeScope).toContain('openid')
+    expect(cfg.exchangeScope).toContain('api://abc123/admin.s3.manager')
+    expect(cfg.exchangeScope).not.toContain('api://abc456')
+    expect(cfg.scope).toContain('api://abc456')
+  })
+
   it('builds simple scope when useSimpleScopes=true', () => {
     getConfig.mockReturnValue({
       get: vi.fn((key) => {
