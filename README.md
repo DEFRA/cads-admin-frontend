@@ -251,7 +251,7 @@ npm run dev
 
 **CADS CDS: Azure AD**
 
-- `db.admin.execute`
+- `admin.db.execute`
 - `admin.s3.manager`
 - `admin.queue.manager`
 
@@ -277,7 +277,7 @@ npm run dev
 - Roles: cads-admin-superuser
 - Refresh: offline access
 - API permissions to `O365-CADS-ADMIN-DEV` (`8b348f4e-a99a-464e-ba26-5fd8bdbf5759`) as an authorised client app to `O365-CADS-CDS-DEV` (`e5acc07b-a696-4998-9bb6-93573ec237b3`)
-  - With scope: `api://e5acc07b-a696-4998-9bb6-93573ec237b3/db.admin.execute"`
+  - With scope: `api://e5acc07b-a696-4998-9bb6-93573ec237b3/admin.db.execute"`
   - With scope: `api://e5acc07b-a696-4998-9bb6-93573ec237b3/admin.s3.manager"`
   - With scope: `api://e5acc07b-a696-4998-9bb6-93573ec237b3/admin.queue.manager"`
 - API permissions to `O365-CADS-ADMIN-DEV` (`8b348f4e-a99a-464e-ba26-5fd8bdbf5759`) as an authorised client app to `O365-CADS-BRIDGE-DEV` (`0b508bbc-9141-41aa-ab05-c63a4ebdeefe`)
@@ -288,7 +288,7 @@ npm run dev
 
 - Name: O365-CADS-CDS-DEV
 - ClientId: e5acc07b-a696-4998-9bb6-93573ec237b3
-- Scope: db.admin.execute, admin.s3.manager, admin.queue.manager
+- Scope: admin.db.execute, admin.s3.manager, admin.queue.manager
 
 **CADS BRIDGE**
 

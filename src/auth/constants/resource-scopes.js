@@ -1,6 +1,6 @@
 const resourceScopes = {
   cadsCds: {
-    dbAdminExecute: 'db.admin.execute',
+    dbAdminExecute: 'admin.db.execute',
     adminS3Manager: 'admin.s3.manager',
     adminQueueManager: 'admin.queue.manager'
   },
