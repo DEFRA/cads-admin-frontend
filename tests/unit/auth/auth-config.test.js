@@ -13,6 +13,7 @@ describe('auth-config', () => {
       get: vi.fn((key) => {
         const map = {
           'azure.cadsCdsClientId': 'abc123',
+          'azure.cadsBridgeClientId': 'abc456',
           'azure.useSimpleScopes': false,
           'oidc.clientId': 'client1',
           'oidc.clientSecret': 'secret1',

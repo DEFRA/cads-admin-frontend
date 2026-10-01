@@ -106,7 +106,7 @@ export const loginRoutes = [
       // Use the subject (sub) as the session ID
       const sessionId = crypto.randomUUID()
 
-      const roles = []
+      const roles = Array.isArray(claims.roles) ? claims.roles : []
       const permissions = []
 
       // Store session in Redis
