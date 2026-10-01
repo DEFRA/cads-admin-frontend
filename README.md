@@ -268,21 +268,21 @@ npm run dev
 **CADS ADMIN MONITORING**
 
 - Name: O365-CADS-ADMIN-DEV
-- ClientId: XXXX
+- ClientId: 8b348f4e-a99a-464e-ba26-5fd8bdbf5759
 - Secret: XYZ
-- Expiry: XX/XX/XXXX
+- Expiry: 30/09/2027
 - Redirect URL: https://cads-admin-frontend.dev.cdp-int.defra.cloud/auth/callback
 - Logout URL: https://cads-admin-frontend.dev.cdp-int.defra.cloud/auth/sign-out
 - Implicit grant: access tokens and ID tokens
 - Roles: cads-admin-superuser
 - Refresh: offline access
-- API permissions to `O365-CADS-ADMIN-DEV` (`XXXX`) as an authorised client app to `O365-CADS-CDS-DEV` (`e5acc07b-a696-4998-9bb6-93573ec237b3`)
+- API permissions to `O365-CADS-ADMIN-DEV` (`8b348f4e-a99a-464e-ba26-5fd8bdbf5759`) as an authorised client app to `O365-CADS-CDS-DEV` (`e5acc07b-a696-4998-9bb6-93573ec237b3`)
   - With scope: `api://e5acc07b-a696-4998-9bb6-93573ec237b3/db.admin.execute"`
   - With scope: `api://e5acc07b-a696-4998-9bb6-93573ec237b3/admin.s3.manager"`
   - With scope: `api://e5acc07b-a696-4998-9bb6-93573ec237b3/admin.queue.manager"`
-- API permissions to `O365-CADS-ADMIN-DEV` (`XXXX`) as an authorised client app to `O365-CADS-BRIDGE-DEV` (`XXXX`)
-  - With scope: `api://e5acc07b-a696-4998-9bb6-93573ec237b3/admin.s3.manager"`
-  - With scope: `api://e5acc07b-a696-4998-9bb6-93573ec237b3/admin.queue.manager"`
+- API permissions to `O365-CADS-ADMIN-DEV` (`8b348f4e-a99a-464e-ba26-5fd8bdbf5759`) as an authorised client app to `O365-CADS-BRIDGE-DEV` (`0b508bbc-9141-41aa-ab05-c63a4ebdeefe`)
+  - With scope: `api://0b508bbc-9141-41aa-ab05-c63a4ebdeefe/admin.s3.manager"`
+  - With scope: `api://0b508bbc-9141-41aa-ab05-c63a4ebdeefe/admin.queue.manager"`
 
 **CADS CDS**
 
@@ -293,7 +293,7 @@ npm run dev
 **CADS BRIDGE**
 
 - Name: O365-CADS-BRIDGE-DEV
-- ClientId: XXXX
+- ClientId: 0b508bbc-9141-41aa-ab05-c63a4ebdeefe
 - Scope: admin.s3.manager, admin.queue.manager
 
 **AAD**
