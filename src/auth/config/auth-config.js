@@ -33,6 +33,8 @@ export function getAuthConfig() {
     useSimpleScopes
   )
 
+  const oidcScopes = ['openid', 'profile', 'email', 'offline_access']
+
   return {
     clientId: config.get('oidc.clientId'),
     clientSecret: config.get('oidc.clientSecret'),
@@ -47,13 +49,9 @@ export function getAuthConfig() {
     externalAuthorizeEndpoint: config.get('oidc.externalAuthorizeEndpoint'),
     externalEndSessionEndpoint: config.get('oidc.externalEndSessionEndpoint'),
     enableDebugEndpoints: config.get('oidc.enableDebugEndpoints'),
-    scope: [
-      'openid',
-      'profile',
-      'email',
-      'offline_access',
-      ...cadsCdsScopes,
-      ...cadsBridgeScopes
-    ].join(' ')
+    // Authorize request: all resources, so the user consents to everything once
+    scope: [...oidcScopes, ...cadsCdsScopes, ...cadsBridgeScopes].join(' '),
+    // Token request: Entra only accepts scopes for a single resource (AADSTS28000)
+    exchangeScope: [...oidcScopes, ...cadsCdsScopes].join(' ')
   }
 }

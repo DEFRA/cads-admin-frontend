@@ -21,6 +21,7 @@ vi.mock('../../../src/auth/config/auth-config.js', () => ({
     clientId: 'client12345',
     redirectPath: '/auth/callback',
     scope: 'openid profile email',
+    exchangeScope: 'openid profile email api://cds/scope',
     externalAuthorizeEndpoint: 'https://cads-oidc-mock/auth',
     defaultRedirect: '/dashboard'
   }))
@@ -222,7 +223,7 @@ describe('GET /login', () => {
     expect(res.headers.location).toBe('/report/holding_summary')
   })
 
-  it('sends the configured scope on the token exchange', async () => {
+  it('sends a single-resource scope on the token exchange', async () => {
     const callback = vi.fn().mockResolvedValue({
       claims: () => ({ sub: '12345' })
     })
@@ -252,7 +253,7 @@ describe('GET /login', () => {
       expect.stringContaining('/auth/callback'),
       { state: 'ABC' },
       { state: 'ABC', nonce: 'XYZ' },
-      { exchangeBody: { scope: 'openid profile email' } }
+      { exchangeBody: { scope: 'openid profile email api://cds/scope' } }
     )
   })
 
