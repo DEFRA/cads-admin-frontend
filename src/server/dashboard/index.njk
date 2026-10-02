@@ -26,7 +26,8 @@
                   </div>
                 </a>
               </div>
-              
+
+              {% if viewModel.canViewS3 %}
               <div class="govuk-grid-column-one-half portal-card" data-testid="monitoring-item">
                 <a href="../s3-monitoring/" class="portal-card-link">
                   <div class="govuk-summary-card">
@@ -41,6 +42,7 @@
                   </div>
                 </a>
               </div>
+              {% endif %}
 
               <div class="govuk-grid-column-one-half portal-card" data-testid="monitoring-item">
                 <a href="../sqs-monitoring/" class="portal-card-link">
