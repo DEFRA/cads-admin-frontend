@@ -83,6 +83,61 @@ const xmlInTag = [
 ]
 const xmlTagOpen = /<[/?!]?[^\s>/]*/y
 
+/**
+ * XML readers consume part of a line from `index` in a given state, push the
+ * tokens they read and return where to carry on and in which state.
+ * @typedef {{ index: number, state: 'text' | 'tag' | 'comment' }} XmlStep
+ */
+
+/** @returns {XmlStep} */
+function readXmlComment(line, index, tokens, searchFrom = index) {
+  const end = line.indexOf('-->', searchFrom)
+  const stop = end === -1 ? line.length : end + 3
+  pushToken(tokens, 'comment', line.slice(index, stop))
+
+  return { index: stop, state: end === -1 ? 'comment' : 'text' }
+}
+
+/** @returns {XmlStep} */
+function readXmlTag(line, index, tokens) {
+  // The last pattern matches any character, so a match is always found
+  for (const [pattern, type] of xmlInTag) {
+    pattern.lastIndex = index
+    const match = pattern.exec(line)
+    if (match) {
+      pushToken(tokens, type, match[0])
+      const closed = type === 'punctuation' && match[0].endsWith('>')
+      return { index: index + match[0].length, state: closed ? 'text' : 'tag' }
+    }
+  }
+}
+
+/** @returns {XmlStep} */
+function readXmlText(line, index, tokens) {
+  const start = line.indexOf('<', index)
+  if (start === -1) {
+    pushToken(tokens, null, line.slice(index))
+    return { index: line.length, state: 'text' }
+  }
+  pushToken(tokens, null, line.slice(index, start))
+
+  if (line.startsWith('<!--', start)) {
+    return readXmlComment(line, start, tokens, start + 4)
+  }
+
+  xmlTagOpen.lastIndex = start
+  const tag = xmlTagOpen.exec(line)[0]
+  pushToken(tokens, 'tag', tag)
+
+  return { index: start + tag.length, state: 'tag' }
+}
+
+const xmlReaders = {
+  text: readXmlText,
+  tag: readXmlTag,
+  comment: readXmlComment
+}
+
 /** @returns {Token[][]} */
 function highlightXmlLines(lines) {
   let state = 'text'
@@ -92,47 +147,9 @@ function highlightXmlLines(lines) {
     let index = 0
 
     while (index < line.length) {
-      if (state === 'comment') {
-        const end = line.indexOf('-->', index)
-        const stop = end === -1 ? line.length : end + 3
-        pushToken(tokens, 'comment', line.slice(index, stop))
-        index = stop
-        state = end === -1 ? 'comment' : 'text'
-      } else if (state === 'tag') {
-        for (const [pattern, type] of xmlInTag) {
-          pattern.lastIndex = index
-          const match = pattern.exec(line)
-          if (match) {
-            pushToken(tokens, type, match[0])
-            index += match[0].length
-            if (type === 'punctuation' && match[0].endsWith('>')) {
-              state = 'text'
-            }
-            break
-          }
-        }
-      } else {
-        const start = line.indexOf('<', index)
-        if (start === -1) {
-          pushToken(tokens, null, line.slice(index))
-          break
-        }
-        pushToken(tokens, null, line.slice(index, start))
-
-        if (line.startsWith('<!--', start)) {
-          const end = line.indexOf('-->', start + 4)
-          const stop = end === -1 ? line.length : end + 3
-          pushToken(tokens, 'comment', line.slice(start, stop))
-          index = stop
-          state = end === -1 ? 'comment' : 'text'
-        } else {
-          xmlTagOpen.lastIndex = start
-          const tag = xmlTagOpen.exec(line)[0]
-          pushToken(tokens, 'tag', tag)
-          index = start + tag.length
-          state = 'tag'
-        }
-      }
+      const step = xmlReaders[state](line, index, tokens)
+      index = step.index
+      state = step.state
     }
 
     return tokens
