@@ -1,0 +1,152 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from "govuk/components/pagination/macro.njk" import govukPagination %}
+
+{% set object = viewModel.object %}
+{% set query = viewModel.query %}
+{% set preview = viewModel.preview %}
+
+{% block content %}
+  {% if viewModel.errorList | length %}
+    {{ govukErrorSummary({
+      titleText: "There is a problem",
+      errorList: viewModel.errorList
+    }) }}
+  {% endif %}
+
+  <span class="govuk-caption-l app-break-word">{{ viewModel.bucket.bucketName }}</span>
+  <h1 class="govuk-heading-l app-break-word">{{ heading }}</h1>
+
+  <p class="govuk-body">
+    <a href="{{ viewModel.folderUrl }}" class="govuk-link">Back to folder</a>
+  </p>
+
+  {{ govukSummaryList({
+    card: { title: { text: "Object details" } },
+    attributes: { "data-testid": "object-metadata" },
+    rows: [
+      {
+        key: { text: "Key" },
+        value: { html: '<code class="app-code-inline app-break-word">' + (object.key | escape) + '</code>' }
+      },
+      {
+        key: { text: "Size" },
+        value: { text: viewModel.sizeText }
+      },
+      {
+        key: { text: "Last modified" },
+        value: { text: object.lastModified | formatDate("d MMMM yyyy, HH:mm:ss") if object.lastModified else "Not available" }
+      },
+      {
+        key: { text: "Storage class" },
+        value: { text: object.storageClass or "Not available" }
+      }
+    ]
+  }) }}
+
+  <h2 class="govuk-heading-m">File contents</h2>
+
+  <form method="get" action="{{ viewModel.formAction }}" novalidate>
+    <input type="hidden" name="key" value="{{ object.key }}">
+    <div class="app-line-range">
+      {{ govukInput({
+        id: "startLine",
+        name: "startLine",
+        label: { text: "Start line", classes: "govuk-label--s" },
+        classes: "govuk-input--width-5",
+        inputmode: "numeric",
+        spellcheck: false,
+        value: query.startText or query.startLine,
+        errorMessage: { text: query.errors.startLine } if query.errors.startLine
+      }) }}
+      {{ govukInput({
+        id: "endLine",
+        name: "endLine",
+        label: { text: "End line", classes: "govuk-label--s" },
+        classes: "govuk-input--width-5",
+        inputmode: "numeric",
+        spellcheck: false,
+        value: query.endText or (query.endLine if not query.errors.endLine),
+        errorMessage: { text: query.errors.endLine } if query.errors.endLine
+      }) }}
+      {{ govukSelect({
+        id: "format",
+        name: "format",
+        label: { text: "Highlight as", classes: "govuk-label--s" },
+        items: viewModel.formatItems
+      }) }}
+    </div>
+    <p class="govuk-hint">You can view up to 1,000 lines at a time.</p>
+    {{ govukButton({ text: "Show lines", classes: "govuk-button--secondary", preventDoubleClick: true }) }}
+  </form>
+
+  {% if preview.status == "ok" %}
+    <h3 class="govuk-heading-s" id="preview-heading">
+      Lines {{ preview.firstLine }} to {{ preview.lastLine }}
+      <span class="govuk-body-s app-caption-detail">(highlighted as {{ preview.format | upper if preview.format != "plain" else "plain text" }})</span>
+    </h3>
+
+    {% if preview.truncated %}
+      {{ govukWarningText({
+        text: "Some lines are longer than 10,000 characters and have been shortened.",
+        iconFallbackText: "Warning"
+      }) }}
+    {% endif %}
+
+    <div class="app-code" role="region" aria-labelledby="preview-heading" tabindex="0" data-testid="file-contents">
+      <table class="app-code__table">
+        <tbody>
+          {% for line in preview.lines %}
+            <tr>
+              <th scope="row" class="app-code__number">{{ line.number }}</th>
+              <td class="app-code__line">{% for token in line.tokens %}{% if token.type %}<span class="app-code__{{ token.type }}">{{ token.text }}</span>{% else %}{{ token.text }}{% endif %}{% endfor %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if preview.reachedEnd %}
+      <p class="govuk-body-s app-end-of-file" data-testid="end-of-file">End of file</p>
+    {% endif %}
+  {% elif preview.status == "empty" %}
+    {{ govukInsetText({ text: "This file is empty." }) }}
+  {% elif preview.status == "binary" %}
+    <div data-testid="preview-unavailable">
+      {{ govukInsetText({
+        html: '<p class="govuk-body govuk-!-font-weight-bold">Preview not available</p><p class="govuk-body govuk-!-margin-bottom-0">This looks like a binary file, so its contents cannot be shown as text.</p>'
+      }) }}
+    </div>
+  {% elif preview.status == "no-line-breaks" %}
+    <div data-testid="preview-unavailable">
+      {{ govukInsetText({
+        html: '<p class="govuk-body govuk-!-font-weight-bold">Preview not available</p><p class="govuk-body govuk-!-margin-bottom-0">This file has no line breaks within the first 1 MB of a line, so it cannot be shown line by line.</p>'
+      }) }}
+    </div>
+  {% elif preview.status == "past-end" %}
+    {{ govukInsetText({ text: "This file has fewer than " + query.startLine + " lines." }) }}
+  {% endif %}
+
+  {% if viewModel.previousUrl or viewModel.nextUrl %}
+    {{ govukPagination({
+      previous: {
+        href: viewModel.previousUrl,
+        text: "Previous lines",
+        labelText: "Previous " + viewModel.lineCount + " lines"
+      } if viewModel.previousUrl,
+      next: {
+        href: viewModel.nextUrl,
+        text: "Next lines",
+        labelText: "Next " + viewModel.lineCount + " lines"
+      } if viewModel.nextUrl,
+      landmarkLabel: "File contents"
+    }) }}
+  {% endif %}
+{% endblock %}

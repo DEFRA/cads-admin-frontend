@@ -1,0 +1,152 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/pagination/macro.njk" import govukPagination %}
+
+{% set filters = viewModel.filters %}
+
+{% block content %}
+  <span class="govuk-caption-l">S3 bucket</span>
+  <h1 class="govuk-heading-l app-break-word">{{ heading }}</h1>
+  <p class="govuk-body">
+    Location: <code class="app-code-inline app-break-word" data-testid="location">{{ viewModel.location }}</code>
+  </p>
+
+  <form method="get" action="{{ viewModel.formAction }}" role="search" aria-label="Filter folders and files" novalidate>
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-one-third">
+        {{ govukInput({
+          id: "prefix",
+          name: "prefix",
+          label: { text: "Prefix", classes: "govuk-label--s" },
+          value: filters.prefix,
+          spellcheck: false,
+          autocomplete: "off"
+        }) }}
+      </div>
+      <div class="govuk-grid-column-one-third">
+        {{ govukInput({
+          id: "folder",
+          name: "folder",
+          label: { text: "Folder name contains", classes: "govuk-label--s" },
+          value: filters.folder,
+          spellcheck: false,
+          autocomplete: "off"
+        }) }}
+      </div>
+      <div class="govuk-grid-column-one-third">
+        {{ govukInput({
+          id: "name",
+          name: "name",
+          label: { text: "File name contains", classes: "govuk-label--s" },
+          value: filters.name,
+          spellcheck: false,
+          autocomplete: "off"
+        }) }}
+      </div>
+    </div>
+
+    {{ govukSelect({
+      id: "pageSize",
+      name: "pageSize",
+      label: { text: "Results per page", classes: "govuk-label--s" },
+      items: viewModel.pageSizeItems
+    }) }}
+
+    <div class="govuk-button-group">
+      {{ govukButton({ text: "Apply filters", preventDoubleClick: true }) }}
+      <a href="{{ viewModel.clearFiltersUrl }}" class="govuk-link">Clear filters</a>
+    </div>
+  </form>
+
+  {% if viewModel.hasPageFilters %}
+    {{ govukInsetText({
+      text: "Folder and file name filters only apply to this page of results. To narrow the whole bucket, use a prefix."
+    }) }}
+  {% endif %}
+
+  {% set entryCount = viewModel.folders.length + viewModel.objects.length %}
+
+  {% if entryCount %}
+    <table class="govuk-table" data-testid="object-table">
+      <caption class="govuk-table__caption govuk-table__caption--m">
+        Folders and files
+        <span class="govuk-body-s app-caption-detail">
+          (page {{ viewModel.page }}: {{ viewModel.folders.length }} {{ "folder" if viewModel.folders.length == 1 else "folders" }},
+          {{ viewModel.objects.length }} {{ "file" if viewModel.objects.length == 1 else "files" }})
+        </span>
+      </caption>
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">Key</th>
+          <th scope="col" class="govuk-table__header govuk-table__header--numeric">Size</th>
+          <th scope="col" class="govuk-table__header">Last modified</th>
+          <th scope="col" class="govuk-table__header">Storage class</th>
+          <th scope="col" class="govuk-table__header"><span class="govuk-visually-hidden">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        {% for folder in viewModel.folders %}
+          <tr class="govuk-table__row" data-testid="folder-row">
+            <th scope="row" class="govuk-table__header app-break-word">
+              <strong class="govuk-tag govuk-tag--grey app-entry-tag">Folder</strong>
+              <a href="{{ folder.url }}" class="govuk-link">{{ folder.name }}</a>
+            </th>
+            <td class="govuk-table__cell govuk-table__cell--numeric">
+              <span aria-hidden="true">-</span><span class="govuk-visually-hidden">Not applicable</span>
+            </td>
+            <td class="govuk-table__cell">
+              <span aria-hidden="true">-</span><span class="govuk-visually-hidden">Not applicable</span>
+            </td>
+            <td class="govuk-table__cell">
+              <span aria-hidden="true">-</span><span class="govuk-visually-hidden">Not applicable</span>
+            </td>
+            <td class="govuk-table__cell">
+              <a href="{{ folder.url }}" class="govuk-link">Open<span class="govuk-visually-hidden"> folder {{ folder.name }}</span></a>
+            </td>
+          </tr>
+        {% endfor %}
+        {% for object in viewModel.objects %}
+          <tr class="govuk-table__row" data-testid="object-row">
+            <th scope="row" class="govuk-table__header app-break-word">
+              <a href="{{ object.viewUrl }}" class="govuk-link">{{ object.name }}</a>
+            </th>
+            <td class="govuk-table__cell govuk-table__cell--numeric app-nowrap">{{ object.size | formatBytes }}</td>
+            <td class="govuk-table__cell app-nowrap">
+              {{ object.lastModified | formatDate("d MMM yyyy, HH:mm:ss") if object.lastModified else "Not available" }}
+            </td>
+            <td class="govuk-table__cell">{{ object.storageClass or "Not available" }}</td>
+            <td class="govuk-table__cell app-nowrap">
+              <a href="{{ object.viewUrl }}" class="govuk-link">View contents<span class="govuk-visually-hidden"> of {{ object.name }}</span></a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="govuk-body" data-testid="no-objects">
+      {% if viewModel.hasPageFilters %}
+        No folders or files on this page match the filters.
+      {% else %}
+        No folders or files found at this location.
+      {% endif %}
+    </p>
+  {% endif %}
+
+  {% if viewModel.pagination.previous or viewModel.pagination.next %}
+    {{ govukPagination({
+      previous: {
+        href: viewModel.pagination.previous.href,
+        labelText: "Page " + (viewModel.page - 1)
+      } if viewModel.pagination.previous,
+      next: {
+        href: viewModel.pagination.next.href,
+        labelText: "Page " + (viewModel.page + 1)
+      } if viewModel.pagination.next,
+      landmarkLabel: "Folder and file results"
+    }) }}
+  {% endif %}
+{% endblock %}
