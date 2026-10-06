@@ -1,0 +1,136 @@
+@use "govuk-frontend" as *;
+
+// Long S3 keys and bucket names have no natural break points
+.app-break-word {
+  overflow-wrap: anywhere;
+}
+
+.app-nowrap {
+  white-space: nowrap;
+}
+
+.app-caption-detail {
+  color: $govuk-secondary-text-colour;
+  font-weight: normal;
+}
+
+.app-entry-tag {
+  margin-right: govuk-spacing(1);
+}
+
+.app-code-inline {
+  font-family: monospace;
+  font-size: 1rem;
+}
+
+.app-line-range {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: govuk-spacing(4);
+
+  .govuk-form-group {
+    margin-bottom: govuk-spacing(2);
+  }
+}
+
+.app-end-of-file {
+  margin-top: govuk-spacing(2);
+  color: $govuk-secondary-text-colour;
+}
+
+// File viewer: a keyboard-scrollable panel so large slices never stretch the page
+.app-code {
+  max-height: 70vh;
+  margin-bottom: govuk-spacing(2);
+  overflow: auto;
+  border: 1px solid $govuk-border-colour;
+  background-color: govuk-colour("white");
+
+  &:focus {
+    outline: $govuk-focus-width solid $govuk-focus-colour;
+    outline-offset: 0;
+  }
+}
+
+.app-code__table {
+  min-width: 100%;
+  border-collapse: collapse;
+  font-family: monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.app-code__number {
+  position: sticky;
+  left: 0;
+  padding: 0 govuk-spacing(2);
+  border-right: 1px solid $govuk-border-colour;
+  color: $govuk-secondary-text-colour;
+  background-color: govuk-colour("light-grey");
+  font-weight: normal;
+  text-align: right;
+  vertical-align: top;
+  user-select: none;
+}
+
+.app-code__line {
+  padding: 0 govuk-spacing(2);
+  color: govuk-colour("black");
+  white-space: pre;
+}
+
+// Token colours all meet WCAG AA contrast against the white panel
+.app-code__key {
+  color: govuk-colour("dark-blue");
+}
+
+.app-code__string,
+.app-code__value {
+  color: govuk-colour("green");
+}
+
+.app-code__num {
+  color: govuk-colour("bright-purple");
+}
+
+.app-code__literal,
+.app-code__attr {
+  color: govuk-colour("purple");
+}
+
+.app-code__punctuation {
+  color: $govuk-secondary-text-colour;
+}
+
+.app-code__tag {
+  color: govuk-colour("blue");
+}
+
+.app-code__comment {
+  color: $govuk-secondary-text-colour;
+  font-style: italic;
+}
+
+.app-code__col0 {
+  color: govuk-colour("black");
+}
+
+.app-code__col1 {
+  color: govuk-colour("blue");
+}
+
+.app-code__col2 {
+  color: govuk-colour("green");
+}
+
+.app-code__col3 {
+  color: govuk-colour("purple");
+}
+
+.app-code__col4 {
+  color: govuk-colour("bright-purple");
+}
+
+.app-code__col5 {
+  color: govuk-colour("dark-blue");
+}

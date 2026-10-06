@@ -1,0 +1,21 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {{ govukErrorSummary({
+        titleText: "There is a problem",
+        descriptionText: message
+      }) }}
+
+      <span class="govuk-caption-l">{{ heading }}</span>
+      <h1 class="govuk-heading-l">{{ message }}</h1>
+
+      <p class="govuk-body">
+        <a href="/s3-monitoring" class="govuk-link">Return to the list of S3 buckets</a>
+      </p>
+    </div>
+  </div>
+{% endblock %}

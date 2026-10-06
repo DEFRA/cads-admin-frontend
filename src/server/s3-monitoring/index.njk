@@ -1,20 +1,61 @@
 {% extends 'layouts/page.njk' %}
 
+{% from "govuk/components/table/macro.njk" import govukTable %}
+
 {% block content %}
   {{ appHeading({
     text: heading,
-    caption: "S3 folder and file monitoring."
+    caption: "Explore the S3 buckets used by CADS. This view is read-only."
   }) }}
 
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column">
-      <div class="govuk-body" data-testid="app-page-body">
-        <main class="govuk-main-wrapper ">
-            <div class="govuk-grid-row">
-            </div>
-        </main>
-      </div>
-    </div>
-  </div>
+  {% set sortLabel = "ascending" if viewModel.sort == "asc" else "descending" %}
+  {% set nextSortLabel = "descending" if viewModel.sort == "asc" else "ascending" %}
 
+  {% set head = [
+    {
+      html: '<a href="' + viewModel.sortUrl + '" class="govuk-link govuk-link--no-visited-state">Bucket name'
+        + '<span class="govuk-visually-hidden">, sort ' + nextSortLabel + '</span></a>',
+      attributes: { "aria-sort": sortLabel }
+    },
+    { text: "Storage client" }
+  ] %}
+  {% if viewModel.showRegion %}
+    {% set _ = head.push({ text: "Region" }) %}
+  {% endif %}
+  {% if viewModel.showTotalObjects %}
+    {% set _ = head.push({ text: "Total objects", format: "numeric" }) %}
+  {% endif %}
+  {% set _ = head.push({ html: '<span class="govuk-visually-hidden">Actions</span>' }) %}
+
+  {% set rows = [] %}
+  {% for bucket in viewModel.buckets %}
+    {% set row = [
+      { text: bucket.bucketName, classes: "app-break-word" },
+      { text: bucket.clientName }
+    ] %}
+    {% if viewModel.showRegion %}
+      {% set _ = row.push({ text: bucket.regionText }) %}
+    {% endif %}
+    {% if viewModel.showTotalObjects %}
+      {% set _ = row.push({ text: bucket.totalObjectsText, format: "numeric" }) %}
+    {% endif %}
+    {% set _ = row.push({
+      html: '<a href="' + bucket.exploreUrl + '" class="govuk-link">Explore<span class="govuk-visually-hidden"> '
+        + (bucket.bucketName | escape) + '</span></a>'
+    }) %}
+    {% set _ = rows.push(row) %}
+  {% endfor %}
+
+  {% if rows | length %}
+    {{ govukTable({
+      caption: "S3 buckets",
+      captionClasses: "govuk-table__caption--m",
+      firstCellIsHeader: true,
+      head: head,
+      rows: rows,
+      attributes: { "data-testid": "bucket-table" }
+    }) }}
+  {% else %}
+    <p class="govuk-body" data-testid="no-buckets">No S3 buckets are available in this environment.</p>
+  {% endif %}
 {% endblock %}
