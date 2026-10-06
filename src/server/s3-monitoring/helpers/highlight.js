@@ -78,8 +78,7 @@ const xmlInTag = [
   [/\??\/?>/y, 'punctuation'],
   [/"[^"]*"?|'[^']*'?/y, 'value'],
   [/=/y, 'punctuation'],
-  [/[^\s=>/?"']+/y, 'attr'],
-  [/[\s\S]/y, null]
+  [/[^\s=>/?"']+/y, 'attr']
 ]
 const xmlTagOpen = /<[/?!]?[^\s>/]*/y
 
@@ -100,16 +99,24 @@ function readXmlComment(line, index, tokens, searchFrom = index) {
 
 /** @returns {XmlStep} */
 function readXmlTag(line, index, tokens) {
-  // The last pattern matches any character, so a match is always found
-  for (const [pattern, type] of xmlInTag) {
+  // Anything no pattern recognises is consumed one character at a time
+  let text = line[index]
+  let type = null
+
+  for (const [pattern, patternType] of xmlInTag) {
     pattern.lastIndex = index
     const match = pattern.exec(line)
     if (match) {
-      pushToken(tokens, type, match[0])
-      const closed = type === 'punctuation' && match[0].endsWith('>')
-      return { index: index + match[0].length, state: closed ? 'text' : 'tag' }
+      text = match[0]
+      type = patternType
+      break
     }
   }
+
+  pushToken(tokens, type, text)
+  const closed = type === 'punctuation' && text.endsWith('>')
+
+  return { index: index + text.length, state: closed ? 'text' : 'tag' }
 }
 
 /** @returns {XmlStep} */

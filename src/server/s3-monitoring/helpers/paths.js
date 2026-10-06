@@ -43,6 +43,26 @@ export function relativeName(key, folder = '') {
   return key.startsWith(folder) ? key.slice(folder.length) : key
 }
 
+// The length of 'cads-internal-bucket'
+const maxCrumbLength = 20
+
+/**
+ * Long crumbs are cut short with an ellipsis; links keep the full name as a
+ * tooltip.
+ */
+function shortenCrumb(item) {
+  if (item.text.length <= maxCrumbLength) {
+    return item
+  }
+
+  const shortened = { ...item, text: `${item.text.slice(0, maxCrumbLength)}…` }
+  if (item.href) {
+    shortened.attributes = { title: item.text }
+  }
+
+  return shortened
+}
+
 /**
  * Breadcrumbs for a location in a bucket. Every complete folder in the path
  * links back to the explorer; a trailing partial prefix or file name is shown
@@ -76,5 +96,5 @@ export function buildBreadcrumbs(bucket, path = '') {
     delete items.at(-1).href
   }
 
-  return items
+  return items.map(shortenCrumb)
 }

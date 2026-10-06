@@ -79,4 +79,26 @@ describe('#buildBreadcrumbs', () => {
   test('Should make the last folder the current page', () => {
     expect(buildBreadcrumbs(bucket, 'a/b/').at(-1)).toEqual({ text: 'b' })
   })
+
+  test('Should keep crumbs as long as cads-internal-bucket', () => {
+    expect(buildBreadcrumbs(bucket, 'cads-internal-bucket/').at(-1)).toEqual({
+      text: 'cads-internal-bucket'
+    })
+  })
+
+  test('Should cut longer crumbs short with an ellipsis', () => {
+    expect(
+      buildBreadcrumbs(
+        bucket,
+        'a-very-long-folder-name/a-very-long-file-name.csv'
+      ).slice(3)
+    ).toEqual([
+      {
+        text: 'a-very-long-folder-n…',
+        href: '/s3-monitoring/buckets/CadsInternalClient?prefix=a-very-long-folder-name%2F',
+        attributes: { title: 'a-very-long-folder-name' }
+      },
+      { text: 'a-very-long-file-nam…' }
+    ])
+  })
 })
