@@ -60,6 +60,8 @@ export function parseViewerQuery(query) {
     errors.endLine = 'End line must be the same as or after the start line'
   } else if (endLine - startLine + 1 > maxLinesPerRequest) {
     errors.endLine = `You can view up to ${maxLinesPerRequest.toLocaleString('en-GB')} lines at a time`
+  } else {
+    // The requested end line is valid, so keep it
   }
   if (errors.endLine) {
     endLine = startLine + defaultLineCount - 1
@@ -166,6 +168,65 @@ async function loadPreview(request, clientName, object, range, format) {
   }
 }
 
+function formatSize(size) {
+  return size >= 1024
+    ? `${formatBytes(size)} (${size.toLocaleString('en-GB')} bytes)`
+    : formatBytes(size)
+}
+
+function renderViewerError(request, h, error, bucket, key) {
+  const knownBucket = bucket ?? error?.bucket
+  return renderS3Error(request, h, error, {
+    notFoundMessage: s3ErrorMessages.objectNotFound,
+    breadcrumbs: knownBucket ? buildBreadcrumbs(knownBucket, key) : undefined
+  })
+}
+
+/**
+ * Links to the slices either side of the current one, the same size as it.
+ */
+function buildPaging(clientName, query, preview) {
+  const { key, startLine, endLine } = query
+  const lineCount = endLine - startLine + 1
+  const format = query.format === 'auto' ? undefined : query.format
+  const rangeUrl = (from, to) =>
+    viewerUrl(clientName, key, { startLine: from, endLine: to, format })
+
+  return {
+    previousUrl:
+      preview && startLine > 1
+        ? rangeUrl(Math.max(1, startLine - lineCount), startLine - 1)
+        : undefined,
+    nextUrl:
+      preview?.status === 'ok' && !preview.reachedEnd
+        ? rangeUrl(endLine + 1, endLine + lineCount)
+        : undefined,
+    lineCount
+  }
+}
+
+function buildViewModel(clientName, query, { bucket, object, preview }) {
+  return {
+    bucket,
+    object,
+    sizeText: formatSize(object.size),
+    query,
+    preview,
+    formAction: `${explorerUrl(clientName)}/object`,
+    folderUrl: explorerUrl(clientName, { prefix: folderOf(query.key) }),
+    errorList: Object.entries(query.errors).map(([field, message]) => ({
+      text: message,
+      href: `#${field}`
+    })),
+    formatItems: Object.entries(previewFormats).map(([value, label]) => ({
+      value,
+      text: label,
+      selected: value === query.format
+    })),
+    ...buildPaging(clientName, query, preview)
+  }
+}
+
 export const s3FileViewerController = {
   async handler(request, h) {
     const { clientName } = request.params
@@ -191,19 +252,8 @@ export const s3FileViewerController = {
         )
       }
     } catch (error) {
-      const knownBucket = bucket ?? error?.bucket
-      return renderS3Error(request, h, error, {
-        notFoundMessage: s3ErrorMessages.objectNotFound,
-        breadcrumbs: knownBucket
-          ? buildBreadcrumbs(knownBucket, key)
-          : undefined
-      })
+      return renderViewerError(request, h, error, bucket, key)
     }
-
-    const lineCount = endLine - startLine + 1
-    const format = query.format === 'auto' ? undefined : query.format
-    const rangeUrl = (from, to) =>
-      viewerUrl(clientName, key, { startLine: from, endLine: to, format })
 
     const fileName = key.slice(key.lastIndexOf('/') + 1) || key
 
@@ -212,36 +262,11 @@ export const s3FileViewerController = {
         pageTitle: `${hasErrors ? 'Error: ' : ''}${fileName} - S3 Monitoring`,
         heading: fileName,
         breadcrumbs: buildBreadcrumbs(bucket, key),
-        viewModel: {
+        viewModel: buildViewModel(clientName, query, {
           bucket,
           object,
-          sizeText:
-            object.size >= 1024
-              ? `${formatBytes(object.size)} (${object.size.toLocaleString('en-GB')} bytes)`
-              : formatBytes(object.size),
-          query,
-          preview,
-          formAction: `${explorerUrl(clientName)}/object`,
-          folderUrl: explorerUrl(clientName, { prefix: folderOf(key) }),
-          errorList: Object.entries(errors).map(([field, message]) => ({
-            text: message,
-            href: `#${field}`
-          })),
-          formatItems: Object.entries(previewFormats).map(([value, label]) => ({
-            value,
-            text: label,
-            selected: value === query.format
-          })),
-          previousUrl:
-            preview && startLine > 1
-              ? rangeUrl(Math.max(1, startLine - lineCount), startLine - 1)
-              : undefined,
-          nextUrl:
-            preview?.status === 'ok' && !preview.reachedEnd
-              ? rangeUrl(endLine + 1, endLine + lineCount)
-              : undefined,
-          lineCount
-        }
+          preview
+        })
       })
       .code(hasErrors ? statusCodes.badRequest : statusCodes.ok)
   }
