@@ -9,3 +9,8 @@ export function extractRoles(claims) {
   const raw = claims?.roles ?? claims?.role ?? []
   return Array.isArray(raw) ? raw : [raw]
 }
+
+export function hasRole(request, role) {
+  const roles = request?.auth?.credentials?.user?.roles
+  return Array.isArray(roles) && roles.includes(role)
+}

@@ -11,6 +11,24 @@
       <div class="govuk-body" data-testid="app-page-body">
         <main class="govuk-main-wrapper ">
             <div class="govuk-grid-row">
+
+              {% if viewModel.canViewCtsImport %}
+              <div class="govuk-grid-column-one-half portal-card" data-testid="monitoring-item">
+                <a href="{{ viewModel.ctsImportUrl }}" class="portal-card-link">
+                  <div class="govuk-summary-card">
+                    <div class="govuk-summary-card__title-wrapper">
+                      <h2 class="govuk-summary-card__title" data-testid="monitoring-item-title">CTS Parallel Import Monitoring</h2>
+                    </div>
+                    <div class="govuk-summary-card__content">
+                      <p class="govuk-body-s" data-testid="monitoring-item-description">
+                        Progress and errors for CTS parallel import runs
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              {% endif %}
+
             </div>
         </main>
       </div>

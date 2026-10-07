@@ -89,4 +89,17 @@ describe('#buildNavigation', () => {
       expect.objectContaining({ current: true })
     )
   })
+
+  test('Should highlight DB Monitoring on its sub pages', () => {
+    const navigation = buildNavigation(
+      mockRequest({
+        path: '/db-monitoring/cts-import',
+        auth: { credentials: credentials('admin.db.execute') }
+      })
+    )
+
+    expect(navigation.find((item) => item.text === 'DB Monitoring')).toEqual(
+      expect.objectContaining({ current: true })
+    )
+  })
 })
