@@ -13,6 +13,10 @@ function getRedisClient() {
   return redisClient
 }
 
+function getDefaultTtlMs() {
+  return getConfig().get('session.cache.ttl')
+}
+
 /**
  * @typedef {Object} SessionData
  * @property {import('openid-client').TokenSet} tokenSet
@@ -20,12 +24,19 @@ function getRedisClient() {
  */
 
 /**
+ * Every key written here expires. A missing or invalid TTL throws rather than
+ * silently storing a key that would live in the shared Redis forever.
+ *
  * @param {string} sessionId
  * @param {SessionData} data
+ * @param {number} [ttlMs] Defaults to session.cache.ttl (SESSION_CACHE_TTL)
  */
-export async function setSession(sessionId, data) {
+export async function setSession(sessionId, data, ttlMs = getDefaultTtlMs()) {
+  if (!Number.isInteger(ttlMs) || ttlMs <= 0) {
+    throw new Error(`Invalid session TTL: ${ttlMs}`)
+  }
   const redis = getRedisClient()
-  await redis.set(sessionId, JSON.stringify(data))
+  await redis.set(sessionId, JSON.stringify(data), 'PX', ttlMs)
 }
 
 /**

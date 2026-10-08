@@ -12,8 +12,10 @@ This service now runs as part of the unified CADS local platform, alongside the 
   - [Node.js](#nodejs)
 - [Server-side Caching](#server-side-caching)
 - [Redis](#redis)
+- [Proxy](#proxy)
 - [Local Development](#local-development)
   - [Setup](#setup)
+  - [Environment variables](#environment-variables)
   - [Development](#development)
   - [Production](#production)
   - [Npm scripts](#npm-scripts)
@@ -24,8 +26,12 @@ This service now runs as part of the unified CADS local platform, alongside the 
   - [Development image](#development-image)
   - [Production image](#production-image)
   - [Docker Compose](#docker-compose)
-  - [Dependabot](#dependabot)
-  - [SonarCloud](#sonarcloud)
+- [Auth configuration: Resources, roles and permissions](#auth-configuration-resources-roles-and-permissions)
+  - [OAuth resources](#oauth-resources)
+  - [Roles](#roles)
+- [Azure AD Configuration](#azure-ad-configuration)
+- [Dependabot](#dependabot)
+- [SonarCloud](#sonarcloud)
 - [Licence](#licence)
   - [About the licence](#about-the-licence)
 
@@ -144,10 +150,13 @@ REDIS_KEY_PREFIX=local-cads-admin-frontend
 USE_SINGLE_INSTANCE_CACHE=true
 REDIS_TLS=false
 
-# CADS CDS: Backend
+# CADS Services
+CADS_BACKEND_TIMEOUT_MS=30000
+
+## CADS CDS: Backend
 CADS_CDS_BACKEND_URL=http://localhost:5555
 
-# CADS BRIDGE: Backend
+## CADS BRIDGE: Backend
 CADS_BRIDGE_BACKEND_URL=http://localhost:5550
 ```
 
@@ -300,12 +309,12 @@ npm run dev
 
 - Well-known: https://6f504113-6b64-43f2-ade9-242e05780007/.well-known/openid-configuration
 
-### Dependabot
+## Dependabot
 
 We have added an example dependabot configuration file to the repository. You can enable it by renaming
 the [.github/example.dependabot.yml](.github/example.dependabot.yml) to `.github/dependabot.yml`
 
-### SonarCloud
+## SonarCloud
 
 Instructions for setting up SonarCloud can be found in [sonar-project.properties](./sonar-project.properties).
 

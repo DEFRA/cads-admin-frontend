@@ -6,6 +6,8 @@ import { getRequestOrigin } from './helpers/request-origin.js'
 import { extractRoles } from './helpers/extract-roles.js'
 import crypto from 'node:crypto'
 
+const HANDSHAKE_TTL_MS = 10 * 60 * 1000
+
 /**
  * @satisfies {import('@hapi/hapi').ServerRoute[]}
  */
@@ -35,11 +37,15 @@ export const loginRoutes = [
       // Store handshake data in Redis
       const tempSessionId = `oidc:${state}`
 
-      await setSession(tempSessionId, {
-        oidcState: state,
-        oidcNonce: nonce,
-        redirectTo: request.app.redirectTo || authConfig.defaultRedirect
-      })
+      await setSession(
+        tempSessionId,
+        {
+          oidcState: state,
+          oidcNonce: nonce,
+          redirectTo: request.app.redirectTo || authConfig.defaultRedirect
+        },
+        HANDSHAKE_TTL_MS
+      )
 
       // Set cookie containing only the temp sessionId
       request.cookieAuth.set({ sessionId: tempSessionId })

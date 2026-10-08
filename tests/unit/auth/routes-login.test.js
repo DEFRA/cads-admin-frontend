@@ -69,7 +69,8 @@ describe('GET /login', () => {
         oidcState: state,
         oidcNonce: nonce,
         redirectTo: '/dashboard'
-      })
+      }),
+      600000
     )
 
     // Cookie contains temp sessionId
@@ -111,7 +112,8 @@ describe('GET /login', () => {
 
     expect(setSession).toHaveBeenCalledWith(
       `oidc:${state}`,
-      expect.objectContaining({ redirectTo: '/custom' })
+      expect.objectContaining({ redirectTo: '/custom' }),
+      600000
     )
   })
 

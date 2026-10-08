@@ -136,6 +136,12 @@ function buildSchema() {
       default: 'http://localhost:5550',
       env: 'CADS_BRIDGE_BACKEND_URL'
     },
+    cadsBackendTimeoutMs: {
+      doc: 'Timeout in milliseconds for each call to the CDS and Bridge backends',
+      format: Number,
+      default: 30000,
+      env: 'CADS_BACKEND_TIMEOUT_MS'
+    },
     log: buildLogSchema({ isProduction }),
     session: buildSessionSchema({ isProduction }),
     redis: buildRedisSchema({ isProduction }),

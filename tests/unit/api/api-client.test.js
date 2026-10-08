@@ -41,7 +41,8 @@ describe('api-client', () => {
     getConfig.mockReturnValue({
       get: vi.fn((key) => {
         const map = {
-          cadsCdsBackendUrl: 'https://backend.example.com/'
+          cadsCdsBackendUrl: 'https://backend.example.com/',
+          cadsBackendTimeoutMs: 30000
         }
         return map[key]
       })
@@ -138,5 +139,35 @@ describe('api-client', () => {
       expect(err.output.statusCode).toBe(400)
       expect(err.output.payload).toEqual({ message: 'Invalid input' })
     }
+  })
+
+  it('passes an abort signal to fetch', async () => {
+    fetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ ok: true }),
+      headers: new Headers()
+    })
+
+    await api.get('/endpoint')
+
+    expect(fetch.mock.calls[0][1].signal).toBeInstanceOf(AbortSignal)
+  })
+
+  it('maps a fetch timeout to a 504 Boom error', async () => {
+    fetch.mockRejectedValue(
+      new DOMException('The operation timed out', 'TimeoutError')
+    )
+
+    await expect(api.get('/slow')).rejects.toMatchObject({
+      isBoom: true,
+      output: { statusCode: 504 }
+    })
+  })
+
+  it('rethrows other fetch errors unchanged', async () => {
+    const networkError = new TypeError('fetch failed')
+    fetch.mockRejectedValue(networkError)
+
+    await expect(api.get('/down')).rejects.toBe(networkError)
   })
 })

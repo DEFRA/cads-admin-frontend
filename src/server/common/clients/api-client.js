@@ -1,3 +1,4 @@
+import { getConfig } from '../../../config/config.js'
 import { getAccessToken } from '../../../auth/resource-tokens.js'
 import { withTraceId } from '@defra/hapi-tracing'
 import { getTracingHeaderName } from '../helpers/request-tracing.js'
@@ -82,21 +83,37 @@ async function callApi(
     ...(token ? { Authorization: `Bearer ${token}` } : {})
   })
 
-  // Perform fetch
-  const response = await fetch(url, { ...options, headers })
+  const timeoutMs = getConfig().get('cadsBackendTimeoutMs')
 
-  if (!response.ok) {
-    const error = Boom.boomify(
-      new Error(`Backend error: ${response.status} ${response.statusText}`),
-      { statusCode: response.status }
-    )
+  try {
+    // The signal bounds the whole call, including reading the response body.
+    // For stream=true it stays active while the caller reads the stream.
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      signal: AbortSignal.timeout(timeoutMs)
+    })
 
-    if (response.headers.get('content-type')?.includes('application/json')) {
-      error.output.payload = await response.json()
+    if (!response.ok) {
+      const error = Boom.boomify(
+        new Error(`Backend error: ${response.status} ${response.statusText}`),
+        { statusCode: response.status }
+      )
+
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        error.output.payload = await response.json()
+      }
+
+      throw error
     }
 
+    return stream ? response : await response.json()
+  } catch (error) {
+    if (error?.name === 'TimeoutError') {
+      throw Boom.gatewayTimeout(
+        `Backend request timed out after ${timeoutMs}ms`
+      )
+    }
     throw error
   }
-
-  return stream ? response : response.json()
 }
