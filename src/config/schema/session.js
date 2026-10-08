@@ -1,3 +1,5 @@
+const devCookiePassword = 'the-password-must-be-at-least-32-characters-long'
+
 export function buildSessionSchema({ isProduction }) {
   const fourHoursMs = 14400000
 
@@ -30,9 +32,9 @@ export function buildSessionSchema({ isProduction }) {
         env: 'SESSION_COOKIE_TTL'
       },
       password: {
-        doc: 'session cookie password',
-        format: String,
-        default: 'the-password-must-be-at-least-32-characters-long',
+        doc: 'session cookie password (at least 32 characters, required in production)',
+        format: cookiePasswordFormat(isProduction),
+        default: isProduction ? '' : devCookiePassword,
         env: 'SESSION_COOKIE_PASSWORD',
         sensitive: true
       },
@@ -42,6 +44,24 @@ export function buildSessionSchema({ isProduction }) {
         default: isProduction,
         env: 'SESSION_COOKIE_SECURE'
       }
+    }
+  }
+}
+
+function cookiePasswordFormat(isProduction) {
+  return (value) => {
+    if (!isProduction) {
+      return
+    }
+    if (typeof value !== 'string' || value.length < 32) {
+      throw new Error(
+        'SESSION_COOKIE_PASSWORD must be set to a secret of at least 32 characters in production'
+      )
+    }
+    if (value === devCookiePassword) {
+      throw new Error(
+        'SESSION_COOKIE_PASSWORD must not use the development default in production'
+      )
     }
   }
 }

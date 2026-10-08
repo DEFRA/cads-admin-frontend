@@ -29,6 +29,7 @@ ARG PARENT_VERSION
 LABEL uk.gov.defra.ffc.parent-image=defradigital/node:${PARENT_VERSION}
 
 ENV TZ="Europe/London"
+ENV NODE_ENV=production
 
 USER root
 RUN apk update \
