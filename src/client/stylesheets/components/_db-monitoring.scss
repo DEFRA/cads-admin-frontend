@@ -1,0 +1,14 @@
+@use "govuk-frontend" as *;
+
+.app-table-scroll {
+  overflow-x: auto;
+  margin-bottom: govuk-spacing(6);
+
+  &:focus {
+    outline: $govuk-focus-width solid $govuk-focus-colour;
+  }
+
+  .govuk-table {
+    margin-bottom: 0;
+  }
+}

@@ -21,7 +21,7 @@ export function buildNavigation(request) {
     {
       text: 'DB Monitoring',
       href: '/db-monitoring',
-      current: request?.path === '/db-monitoring'
+      current: isCurrent(request, '/db-monitoring')
     },
     ...(hasScope(request, resourceScopes.cadsCds.adminS3Manager)
       ? [

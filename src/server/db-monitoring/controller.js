@@ -1,3 +1,6 @@
+import { canViewCtsImport } from './helpers/cts-import-access.js'
+import { ctsImportPath } from './cts-import-controller.js'
+
 export const dbMonitoringDashboardController = {
   async handler(request, h) {
     return h.view('db-monitoring/index', {
@@ -12,7 +15,10 @@ export const dbMonitoringDashboardController = {
           text: 'DB Monitoring'
         }
       ],
-      viewModel: {}
+      viewModel: {
+        canViewCtsImport: canViewCtsImport(request),
+        ctsImportUrl: ctsImportPath
+      }
     })
   }
 }

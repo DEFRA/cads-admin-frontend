@@ -6,6 +6,7 @@ import { dashboard } from './dashboard/index.js'
 import { dbMonitoringDashboard } from './db-monitoring/index.js'
 import { s3MonitoringDashboard } from './s3-monitoring/index.js'
 import { sqsMonitoringDashboard } from './sqs-monitoring/index.js'
+import { unauthorised } from './unauthorised/index.js'
 
 import { getStaticFilesToServe } from './common/helpers/serve-static-files.js'
 
@@ -24,7 +25,8 @@ export const router = {
         dashboard,
         dbMonitoringDashboard,
         s3MonitoringDashboard,
-        sqsMonitoringDashboard
+        sqsMonitoringDashboard,
+        unauthorised
       ])
 
       // Static assets

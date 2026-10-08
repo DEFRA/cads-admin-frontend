@@ -1,0 +1,72 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+
+{% set fieldErrors = viewModel.fieldErrors %}
+
+{% block content %}
+  {% if viewModel.errorList | length %}
+    {{ govukErrorSummary({
+      titleText: "There is a problem",
+      errorList: viewModel.errorList,
+      attributes: { "data-testid": "error-summary" }
+    }) }}
+  {% endif %}
+
+  {{ appHeading({
+    text: heading,
+    caption: "Progress and errors for CTS parallel import runs. This view is read-only."
+  }) }}
+
+  {% if viewModel.runsLoaded and not viewModel.runItems | length %}
+    {{ govukInsetText({
+      text: "There are no CTS parallel import runs.",
+      attributes: { "data-testid": "no-runs" }
+    }) }}
+  {% elif viewModel.runItems | length %}
+    <form method="get" action="{{ viewModel.formAction }}" novalidate data-testid="cts-import-form">
+      {{ govukSelect({
+        id: "runId",
+        name: "runId",
+        label: { text: "Import run", classes: "govuk-label--s" },
+        items: viewModel.runItems,
+        errorMessage: { text: fieldErrors.runId } if fieldErrors.runId
+      }) }}
+
+      {{ govukRadios({
+        idPrefix: "command",
+        name: "command",
+        fieldset: {
+          legend: { text: "Command", classes: "govuk-fieldset__legend--s" }
+        },
+        items: viewModel.commandItems,
+        errorMessage: { text: fieldErrors.command } if fieldErrors.command
+      }) }}
+
+      {{ govukButton({ text: "Run command", preventDoubleClick: true }) }}
+    </form>
+  {% endif %}
+
+  {% if viewModel.result %}
+    {% if viewModel.result.rows | length %}
+      <div class="app-table-scroll" role="region" aria-label="{{ viewModel.result.caption }}" tabindex="0">
+        {{ govukTable({
+          caption: viewModel.result.caption,
+          captionClasses: "govuk-table__caption--m",
+          head: viewModel.result.head,
+          rows: viewModel.result.rows,
+          classes: "govuk-table--small-text-until-tablet",
+          attributes: { "data-testid": "result-table" }
+        }) }}
+      </div>
+    {% else %}
+      <h2 class="govuk-heading-m">{{ viewModel.result.caption }}</h2>
+      <p class="govuk-body" data-testid="no-results">There are no results for this run.</p>
+    {% endif %}
+  {% endif %}
+{% endblock %}
