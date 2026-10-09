@@ -14,28 +14,30 @@ vi.mock('../../auth/auth-required.js', () => ({
   authRequired: vi.fn((_req, h) => h.continue)
 }))
 
-const runsPath = '/api/v1/systemadmin/db-admin-cts-import/runs'
 const commandPath = '/api/v1/systemadmin/db-admin-cts-import'
 
 const runs = [
   {
-    runId: 2,
+    run_id: 2,
     status: 'processing bulk',
-    createdAt: '2026-10-02T08:00:00Z',
-    bulkCompletedAt: null,
-    completedAt: null
+    created_at: '2026-10-02T08:00:00Z',
+    bulk_completed_at: null,
+    completed_at: null
   },
   {
-    runId: 1,
+    run_id: 1,
     status: 'complete',
-    createdAt: '2026-10-01T08:00:00Z',
-    bulkCompletedAt: '2026-10-01T10:00:00Z',
-    completedAt: '2026-10-01T11:00:00Z'
+    created_at: '2026-10-01T08:00:00Z',
+    bulk_completed_at: '2026-10-01T10:00:00Z',
+    completed_at: '2026-10-01T11:00:00Z'
   }
 ]
 
+const runsResponse = (result = runs) =>
+  jsonResponse({ command: 'runs', result })
+
 /**
- * Routes the mocked fetch by backend path and records each call.
+ * Routes the mocked fetch by the posted command and records each call.
  *
  * @param {Record<string, (init: RequestInit) => Response>} routes
  */
@@ -43,10 +45,11 @@ function mockCdsApi(routes) {
   const calls = []
   fetch.mockImplementation(async (url, init) => {
     const { pathname } = new URL(url)
-    calls.push({ pathname, init })
-    const handler = routes[pathname]
+    const { command } = JSON.parse(init?.body ?? '{}')
+    calls.push({ pathname, command, init })
+    const handler = pathname === commandPath ? routes[command] : undefined
     if (!handler) {
-      throw new Error(`Unexpected backend call: ${url}`)
+      throw new Error(`Unexpected backend call: ${url} ${command}`)
     }
     return handler(init)
   })
@@ -101,7 +104,7 @@ describe('#ctsImportController', () => {
 
   describe('run selection', () => {
     test('Should list the runs and command types, latest run selected', async () => {
-      const calls = mockCdsApi({ [runsPath]: () => jsonResponse({ runs }) })
+      const calls = mockCdsApi({ runs: () => runsResponse() })
 
       const { response, $ } = await getPage()
 
@@ -109,7 +112,7 @@ describe('#ctsImportController', () => {
       expect(response.result).toEqual(
         expect.stringContaining('CTS Parallel Import Monitoring |')
       )
-      expect(calls.map((call) => call.pathname)).toEqual([runsPath])
+      expect(calls.map((call) => call.command)).toEqual(['runs'])
 
       const options = $('#runId option')
       expect(options).toHaveLength(2)
@@ -129,7 +132,7 @@ describe('#ctsImportController', () => {
     })
 
     test('Should say when there are no runs', async () => {
-      mockCdsApi({ [runsPath]: () => jsonResponse({ runs: [] }) })
+      mockCdsApi({ runs: () => runsResponse([]) })
 
       const { $ } = await getPage()
 
@@ -143,8 +146,8 @@ describe('#ctsImportController', () => {
   describe('running a command', () => {
     test('Should post the command and show the result as a table', async () => {
       const calls = mockCdsApi({
-        [runsPath]: () => jsonResponse({ runs }),
-        [commandPath]: () =>
+        runs: () => runsResponse(),
+        deferred_errors: () =>
           jsonResponse({
             command: 'deferred_errors',
             result: [{ table_name: 'cts_animal', error: 'bad date', rows: 12 }]
@@ -157,7 +160,7 @@ describe('#ctsImportController', () => {
 
       expect(response.statusCode).toBe(statusCodes.ok)
 
-      const post = calls.find((call) => call.pathname === commandPath)
+      const post = calls.find((call) => call.command === 'deferred_errors')
       expect(post.init.method).toBe('POST')
       expect(JSON.parse(post.init.body)).toEqual({
         command: 'deferred_errors',
@@ -188,8 +191,8 @@ describe('#ctsImportController', () => {
 
     test('Should say when the run has no results', async () => {
       mockCdsApi({
-        [runsPath]: () => jsonResponse({ runs }),
-        [commandPath]: () => jsonResponse({ command: 'plan', result: {} })
+        runs: () => runsResponse(),
+        plan: () => jsonResponse({ command: 'plan', result: {} })
       })
 
       const { $ } = await getPage(
@@ -202,14 +205,14 @@ describe('#ctsImportController', () => {
     })
 
     test('Should show field errors and not run a command for invalid input', async () => {
-      const calls = mockCdsApi({ [runsPath]: () => jsonResponse({ runs }) })
+      const calls = mockCdsApi({ runs: () => runsResponse() })
 
       const { response, $ } = await getPage(
         '/db-monitoring/cts-import?runId=abc&command=drop_tables'
       )
 
       expect(response.statusCode).toBe(statusCodes.badRequest)
-      expect(calls.map((call) => call.pathname)).toEqual([runsPath])
+      expect(calls.map((call) => call.command)).toEqual(['runs'])
 
       const summary = $('[data-testid="error-summary"]')
       expect(summary.find('a[href="#runId"]').text()).toBe(
@@ -222,7 +225,7 @@ describe('#ctsImportController', () => {
   describe('API errors', () => {
     test('Should show a GOV.UK error summary when the runs cannot be loaded', async () => {
       mockCdsApi({
-        [runsPath]: () => new Response('boom', { status: 500 })
+        runs: () => new Response('boom', { status: 500 })
       })
 
       const { response, $ } = await getPage()
@@ -236,8 +239,8 @@ describe('#ctsImportController', () => {
 
     test('Should keep the form and show an error when the command fails', async () => {
       mockCdsApi({
-        [runsPath]: () => jsonResponse({ runs }),
-        [commandPath]: () =>
+        runs: () => runsResponse(),
+        summary: () =>
           jsonResponse(
             { title: 'One or more validation errors occurred.' },
             400
@@ -258,7 +261,7 @@ describe('#ctsImportController', () => {
 
     test('Should not expose the backend URL in the page', async () => {
       mockCdsApi({
-        [runsPath]: () => {
+        runs: () => {
           throw new TypeError('fetch failed')
         }
       })

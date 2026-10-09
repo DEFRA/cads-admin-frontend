@@ -8,9 +8,22 @@ function cdsClient(request) {
   return createApiClient(request, getConfig().get('cadsCdsBackendUrl'))
 }
 
-export function getCtsImportRuns(request) {
-  return cdsClient(request).get(`${basePath}/runs`)
+function toRun(row) {
+  return {
+    runId: row.run_id,
+    status: row.status,
+    createdAt: row.created_at,
+    bulkCompletedAt: row.bulk_completed_at,
+    completedAt: row.completed_at
+  }
 }
+
+export async function getCtsImportRuns(request) {
+  const response = await cdsClient(request).post(basePath, { command: 'runs' })
+  const rows = Array.isArray(response?.result) ? response.result : []
+  return rows.map(toRun)
+}
+
 export function runCtsImportCommand(request, command, runId) {
   return cdsClient(request).post(basePath, {
     command,

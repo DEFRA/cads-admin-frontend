@@ -84,8 +84,7 @@ export const ctsImportController = {
       }
     }
 
-    const runs =
-      runsOutcome.status === 'fulfilled' ? (runsOutcome.value?.runs ?? []) : []
+    const runs = runsOutcome.status === 'fulfilled' ? runsOutcome.value : []
     const selectedRunId = query.runId ?? String(runs[0]?.runId ?? '')
     const selectedCommand = query.command ?? ctsImportCommands[0].value
 
