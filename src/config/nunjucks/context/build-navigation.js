@@ -12,7 +12,7 @@ export function buildNavigation(request) {
     return []
   }
 
-  let hasMonitoringScope = hasAnyScope(request, [
+  const hasMonitoringScope = hasAnyScope(request, [
     resourceScopes.cadsCds.adminQueueManager,
     resourceScopes.cadsCds.adminS3Manager,
     resourceScopes.cadsCds.dbAdminExecute,
