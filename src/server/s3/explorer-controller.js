@@ -194,7 +194,7 @@ export function createExplorerController({ pageTokens }) {
         )
       }
 
-      return h.view('s3-monitoring/explorer', {
+      return h.view('s3/explorer', {
         pageTitle: `${bucket.bucketName} - S3 Monitoring`,
         heading: bucket.bucketName,
         breadcrumbs: buildBreadcrumbs(bucket, prefix),

@@ -69,7 +69,7 @@ describe('#ctsImportController', () => {
   })
 
   async function getPage(
-    url = '/db-monitoring/cts-import',
+    url = '/dashboard/monitoring/db/cts-import',
     creds = ctsImportUser
   ) {
     const response = await server.inject({
@@ -155,7 +155,7 @@ describe('#ctsImportController', () => {
       })
 
       const { response, $ } = await getPage(
-        '/db-monitoring/cts-import?runId=1&command=deferred_errors'
+        '/dashboard/monitoring/db/cts-import?runId=1&command=deferred_errors'
       )
 
       expect(response.statusCode).toBe(statusCodes.ok)
@@ -196,7 +196,7 @@ describe('#ctsImportController', () => {
       })
 
       const { $ } = await getPage(
-        '/db-monitoring/cts-import?runId=2&command=plan'
+        '/dashboard/monitoring/db/cts-import?runId=2&command=plan'
       )
 
       expect($('[data-testid="no-results"]').text()).toContain(
@@ -208,7 +208,7 @@ describe('#ctsImportController', () => {
       const calls = mockCdsApi({ runs: () => runsResponse() })
 
       const { response, $ } = await getPage(
-        '/db-monitoring/cts-import?runId=abc&command=drop_tables'
+        '/dashboard/monitoring/db/cts-import?runId=abc&command=drop_tables'
       )
 
       expect(response.statusCode).toBe(statusCodes.badRequest)
@@ -248,7 +248,7 @@ describe('#ctsImportController', () => {
       })
 
       const { response, $ } = await getPage(
-        '/db-monitoring/cts-import?runId=2&command=summary'
+        '/dashboard/monitoring/db/cts-import?runId=2&command=summary'
       )
 
       expect(response.statusCode).toBe(statusCodes.badRequest)

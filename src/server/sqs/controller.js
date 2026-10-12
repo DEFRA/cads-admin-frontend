@@ -1,6 +1,6 @@
 export const sqsMonitoringDashboardController = {
   async handler(request, h) {
-    return h.view('sqs-monitoring/index', {
+    return h.view('sqs/index', {
       pageTitle: 'SQS Monitoring',
       heading: 'Message queue and DLQ monitoring',
       breadcrumbs: [
@@ -9,7 +9,11 @@ export const sqsMonitoringDashboardController = {
           href: '/dashboard'
         },
         {
-          text: 'SQS Monitoring'
+          text: 'Monitoring',
+          href: '/dashboard/monitoring'
+        },
+        {
+          text: 'SQS'
         }
       ],
       viewModel: {}

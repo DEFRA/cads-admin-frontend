@@ -19,23 +19,9 @@ export function buildNavigation(request) {
       current: request?.path === '/dashboard'
     },
     {
-      text: 'DB Monitoring',
-      href: '/db-monitoring',
-      current: isCurrent(request, '/db-monitoring')
-    },
-    ...(hasScope(request, resourceScopes.cadsCds.adminS3Manager)
-      ? [
-          {
-            text: 'S3 Monitoring',
-            href: '/s3-monitoring',
-            current: isCurrent(request, '/s3-monitoring')
-          }
-        ]
-      : []),
-    {
-      text: 'SQS Monitoring',
-      href: '/sqs-monitoring',
-      current: request?.path === '/sqs-monitoring'
+      text: 'Monitoring',
+      href: '/dashboard/monitoring',
+      current: isCurrent(request, '/dashboard/monitoring')
     },
     {
       text: 'Sign out',

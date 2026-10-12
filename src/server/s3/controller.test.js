@@ -33,7 +33,7 @@ describe('#s3MonitoringDashboardController', () => {
     await server.stop({ timeout: 0 })
   })
 
-  async function getPage(url = '/s3-monitoring') {
+  async function getPage(url = '/dashboard/monitoring/s3') {
     const response = await server.inject({ method: 'GET', url })
     return { response, $: cheerio.load(response.result) }
   }
@@ -68,11 +68,11 @@ describe('#s3MonitoringDashboardController', () => {
     test('Should sort buckets by name descending', async () => {
       mockStorageApi({ [storagePaths.buckets]: () => jsonResponse(buckets) })
 
-      const { $ } = await getPage('/s3-monitoring?sort=desc')
+      const { $ } = await getPage('/dashboard/monitoring/s3?sort=desc')
       const header = $('[data-testid="bucket-table"] thead th').first()
 
       expect(header.attr('aria-sort')).toBe('descending')
-      expect(header.find('a').attr('href')).toBe('/s3-monitoring?sort=asc')
+      expect(header.find('a').attr('href')).toBe('/dashboard/monitoring/s3?sort=asc')
       expect(
         $('[data-testid="bucket-table"] tbody th').first().text().trim()
       ).toBe('cads-internal')
