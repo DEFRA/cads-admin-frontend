@@ -60,7 +60,7 @@ describe('#s3MonitoringDashboardController', () => {
       expect(rows.eq(0).find('th').text().trim()).toBe('cads-external')
       expect(rows.eq(1).find('th').text().trim()).toBe('cads-internal')
       expect(rows.eq(1).find('a').attr('href')).toBe(
-        '/s3-monitoring/buckets/CadsInternalClient'
+        '/dashboard/monitoring/s3/buckets/CadsInternalClient'
       )
       expect(rows.eq(1).find('a').text()).toContain('Explore')
     })

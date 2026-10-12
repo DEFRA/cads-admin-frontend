@@ -12,12 +12,12 @@ describe('#explorerUrl', () => {
   test('Should omit empty parameters', () => {
     expect(
       explorerUrl('CadsInternalClient', { prefix: '', page: undefined })
-    ).toBe('/s3-monitoring/buckets/CadsInternalClient')
+    ).toBe('/dashboard/monitoring/s3/buckets/CadsInternalClient')
   })
 
   test('Should encode the client name and parameters', () => {
     expect(explorerUrl('a b', { prefix: 'x/y z/' })).toBe(
-      '/s3-monitoring/buckets/a%20b?prefix=x%2Fy+z%2F'
+      '/dashboard/monitoring/s3/buckets/a%20b?prefix=x%2Fy+z%2F'
     )
   })
 })
@@ -25,7 +25,7 @@ describe('#explorerUrl', () => {
 describe('#viewerUrl', () => {
   test('Should put the key first', () => {
     expect(viewerUrl('C', 'a/b.csv', { startLine: 5 })).toBe(
-      '/s3-monitoring/buckets/C/object?key=a%2Fb.csv&startLine=5'
+      '/dashboard/monitoring/s3/buckets/C/object?key=a%2Fb.csv&startLine=5'
     )
   })
 })
@@ -53,7 +53,8 @@ describe('#buildBreadcrumbs', () => {
   test('Should make the bucket the current page at its root', () => {
     expect(buildBreadcrumbs(bucket)).toEqual([
       { text: 'Dashboard', href: '/dashboard' },
-      { text: 'S3 Monitoring', href: '/s3-monitoring' },
+      { text: 'Monitoring', href: '/dashboard/monitoring' },
+      { text: 'S3', href: '/dashboard/monitoring/s3' },
       { text: 'cads-internal' }
     ])
   })
@@ -61,16 +62,20 @@ describe('#buildBreadcrumbs', () => {
   test('Should link each folder and show a file name as the current page', () => {
     expect(buildBreadcrumbs(bucket, 'a/b/c.csv').slice(2)).toEqual([
       {
-        text: 'cads-internal',
-        href: '/s3-monitoring/buckets/CadsInternalClient'
+        href: '/dashboard/monitoring/s3',
+        text: 'S3'
+      },
+      {
+        href: '/dashboard/monitoring/s3/buckets/CadsInternalClient',
+        text: 'cads-internal'
       },
       {
         text: 'a',
-        href: '/s3-monitoring/buckets/CadsInternalClient?prefix=a%2F'
+        href: '/dashboard/monitoring/s3/buckets/CadsInternalClient?prefix=a%2F'
       },
       {
         text: 'b',
-        href: '/s3-monitoring/buckets/CadsInternalClient?prefix=a%2Fb%2F'
+        href: '/dashboard/monitoring/s3/buckets/CadsInternalClient?prefix=a%2Fb%2F'
       },
       { text: 'c.csv' }
     ])
@@ -94,8 +99,12 @@ describe('#buildBreadcrumbs', () => {
       ).slice(3)
     ).toEqual([
       {
+        href: '/dashboard/monitoring/s3/buckets/CadsInternalClient',
+        text: 'cads-internal'
+      },
+      {
         text: 'a-very-long-folder-n…',
-        href: '/s3-monitoring/buckets/CadsInternalClient?prefix=a-very-long-folder-name%2F',
+        href: '/dashboard/monitoring/s3/buckets/CadsInternalClient?prefix=a-very-long-folder-name%2F',
         attributes: { title: 'a-very-long-folder-name' }
       },
       { text: 'a-very-long-file-nam…' }

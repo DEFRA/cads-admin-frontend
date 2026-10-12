@@ -34,3 +34,16 @@ export function hasScope(request, scope) {
   const accessToken = request?.auth?.credentials?.tokenSet?.access_token
   return extractScopes(accessToken).includes(scope)
 }
+
+/**
+ * True when the signed-in user's CDS access token carries at least one of
+ * the given scopes.
+ *
+ * @param {import('@hapi/hapi').Request} request
+ * @param {string[]} scopes
+ */
+export function hasAnyScope(request, scopes) {
+  const accessToken = request?.auth?.credentials?.tokenSet?.access_token
+  const tokenScopes = extractScopes(accessToken)
+  return scopes.some((scope) => tokenScopes.includes(scope))
+}

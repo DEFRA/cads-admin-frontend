@@ -11,7 +11,7 @@ import {
 } from './helpers/cts-import-commands.js'
 import { describeCtsImportError } from './helpers/errors.js'
 
-export const ctsImportPath = '/db/cts-import'
+export const ctsImportPath = '/dashboard/monitoring/db/cts-import'
 
 const pageTitle = 'CTS Parallel Import Monitoring'
 

@@ -22,7 +22,7 @@ vi.mock('../../auth/helpers/extract-scopes.js', () => ({
 stubFetch()
 
 const clientName = 'CadsInternalClient'
-const explorerPath = `/s3-monitoring/buckets/${clientName}`
+const explorerPath = `/dashboard/monitoring/s3/buckets/${clientName}`
 
 const listing = {
   folders: ['imports/2024/', 'imports/archive/'],
@@ -120,16 +120,17 @@ describe('#s3ExplorerController', () => {
 
     expect(crumbs.map((_, el) => $(el).text().trim()).get()).toEqual([
       'Dashboard',
-      'S3 Monitoring',
+      'Monitoring',
+      'S3',
       'cads-internal',
       'imports',
       '2024'
     ])
-    expect(crumbs.eq(2).find('a').attr('href')).toBe(explorerPath)
-    expect(crumbs.eq(3).find('a').attr('href')).toBe(
+    expect(crumbs.eq(3).find('a').attr('href')).toBe(explorerPath)
+    expect(crumbs.eq(4).find('a').attr('href')).toBe(
       `${explorerPath}?prefix=imports%2F`
     )
-    expect(crumbs.eq(4).attr('aria-current')).toBe('page')
+    expect(crumbs.eq(5).attr('aria-current')).toBe('page')
   })
 
   test('Should filter folders by name', async () => {
@@ -206,7 +207,9 @@ describe('#s3ExplorerController', () => {
         jsonResponse("No storage client named 'NoSuchClient'", 404)
     })
 
-    const { response, $ } = await getPage('/s3-monitoring/buckets/NoSuchClient')
+    const { response, $ } = await getPage(
+      '/dashboard/monitoring/s3/buckets/NoSuchClient'
+    )
 
     expect(response.statusCode).toBe(statusCodes.notFound)
     expect($('.govuk-error-summary').text()).toContain('Bucket not found')
