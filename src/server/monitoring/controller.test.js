@@ -32,7 +32,9 @@ describe('#monitoringController', () => {
     })
 
     test('Should show monitoring dashboard page', async () => {
-      expect(response.result).toEqual(expect.stringContaining('Dashboard | Monitoring'))
+      expect(response.result).toEqual(
+        expect.stringContaining('Dashboard | Monitoring')
+      )
       expect(response.statusCode).toBe(statusCodes.ok)
     })
   })

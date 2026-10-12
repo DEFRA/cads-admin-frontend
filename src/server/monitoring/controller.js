@@ -8,7 +8,8 @@ export const monitoringController = {
       heading: 'Monitoring Dashboard',
       breadcrumbs: [
         { text: 'Dashboard', href: '/dashboard' },
-        { text: 'Monitoring' }],
+        { text: 'Monitoring' }
+      ],
       viewModel: {
         canViewS3: hasScope(request, resourceScopes.cadsCds.adminS3Manager)
       }

@@ -72,7 +72,9 @@ describe('#s3MonitoringDashboardController', () => {
       const header = $('[data-testid="bucket-table"] thead th').first()
 
       expect(header.attr('aria-sort')).toBe('descending')
-      expect(header.find('a').attr('href')).toBe('/dashboard/monitoring/s3?sort=asc')
+      expect(header.find('a').attr('href')).toBe(
+        '/dashboard/monitoring/s3?sort=asc'
+      )
       expect(
         $('[data-testid="bucket-table"] tbody th').first().text().trim()
       ).toBe('cads-internal')
