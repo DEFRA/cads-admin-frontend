@@ -1,6 +1,3 @@
-import { hasScope } from '../../../auth/helpers/extract-scopes.js'
-import { resourceScopes } from '../../../auth/constants/resource-scopes.js'
-
 function isCurrent(request, path) {
   return request?.path === path || request?.path?.startsWith(`${path}/`)
 }
