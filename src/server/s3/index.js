@@ -38,19 +38,19 @@ export const s3MonitoringDashboard = {
       server.route([
         {
           method: 'GET',
-          path: '/s3-monitoring',
+          path: '/dashboard/monitoring/s3',
           options: routeOptions,
           ...s3MonitoringDashboardController
         },
         {
           method: 'GET',
-          path: '/s3-monitoring/buckets/{clientName}',
+          path: '/dashboard/monitoring/s3/buckets/{clientName}',
           options: routeOptions,
           ...createExplorerController({ pageTokens })
         },
         {
           method: 'GET',
-          path: '/s3-monitoring/buckets/{clientName}/object',
+          path: '/dashboard/monitoring/s3/buckets/{clientName}/object',
           options: routeOptions,
           ...s3FileViewerController
         }

@@ -5,12 +5,12 @@ import { authRequired } from '../../auth/auth-required.js'
 
 export const dbMonitoringDashboard = {
   plugin: {
-    name: 'db-monitoring',
+    name: 'db',
     register(server) {
       server.route([
         {
           method: 'GET',
-          path: '/db-monitoring',
+          path: '/dashboard/monitoring/db',
           options: {
             auth: {
               strategy: 'session',

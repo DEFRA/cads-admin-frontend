@@ -73,7 +73,7 @@ export function renderS3Error(request, h, error, options = {}) {
   }
 
   return h
-    .view('s3-monitoring/error', {
+    .view('s3/error', {
       pageTitle: `Error: ${message}`,
       heading: 'S3 Monitoring',
       message,

@@ -11,13 +11,14 @@ import {
 } from './helpers/cts-import-commands.js'
 import { describeCtsImportError } from './helpers/errors.js'
 
-export const ctsImportPath = '/db-monitoring/cts-import'
+export const ctsImportPath = '/dashboard/monitoring/db/cts-import'
 
 const pageTitle = 'CTS Parallel Import Monitoring'
 
 const breadcrumbs = [
   { text: 'Dashboard', href: '/dashboard' },
-  { text: 'DB Monitoring', href: '/db-monitoring' },
+  { text: 'Monitoring', href: '/dashboard/monitoring' },
+  { text: 'DB', href: '/dashboard/monitoring/db' },
   { text: pageTitle }
 ]
 
@@ -105,7 +106,7 @@ export const ctsImportController = {
         : null
 
     return h
-      .view('db-monitoring/cts-import', {
+      .view('db/cts-import', {
         pageTitle: errorList.length ? `Error: ${pageTitle}` : pageTitle,
         heading: pageTitle,
         breadcrumbs,

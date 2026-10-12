@@ -258,7 +258,7 @@ export const s3FileViewerController = {
     const fileName = key.slice(key.lastIndexOf('/') + 1) || key
 
     return h
-      .view('s3-monitoring/viewer', {
+      .view('s3/viewer', {
         pageTitle: `${hasErrors ? 'Error: ' : ''}${fileName} - S3 Monitoring`,
         heading: fileName,
         breadcrumbs: buildBreadcrumbs(bucket, key),

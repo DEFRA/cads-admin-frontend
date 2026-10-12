@@ -5,7 +5,7 @@ vi.mock('../../auth/auth-required.js', () => ({
   authRequired: vi.fn((_req, h) => h.continue)
 }))
 
-describe('#sqsMonitoringDashboardController', () => {
+describe('#monitoringController', () => {
   let server
 
   beforeAll(async () => {
@@ -21,19 +21,19 @@ describe('#sqsMonitoringDashboardController', () => {
     vi.clearAllMocks()
   })
 
-  describe('GET SQS Monitoring page', async () => {
+  describe('GET monitoring page', async () => {
     let response = null
 
     beforeAll(async () => {
       response = await server.inject({
         method: 'GET',
-        url: '/sqs-monitoring'
+        url: '/dashboard/monitoring'
       })
     })
 
-    test('Should show SQS Monitoring page', async () => {
+    test('Should show monitoring dashboard page', async () => {
       expect(response.result).toEqual(
-        expect.stringContaining('SQS Monitoring |')
+        expect.stringContaining('Monitoring Dashboard |')
       )
       expect(response.statusCode).toBe(statusCodes.ok)
     })

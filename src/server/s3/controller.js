@@ -4,7 +4,8 @@ import { bucketListUrl, explorerUrl } from './helpers/paths.js'
 
 const breadcrumbs = [
   { text: 'Dashboard', href: '/dashboard' },
-  { text: 'S3 Monitoring' }
+  { text: 'Monitoring', href: '/dashboard/monitoring' },
+  { text: 'S3' }
 ]
 
 export const s3MonitoringDashboardController = {
@@ -25,7 +26,7 @@ export const s3MonitoringDashboardController = {
       sorted.reverse()
     }
 
-    return h.view('s3-monitoring/index', {
+    return h.view('s3/index', {
       pageTitle: 'S3 Monitoring',
       heading: 'S3 folder and file monitoring',
       breadcrumbs,

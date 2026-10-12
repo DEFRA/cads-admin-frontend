@@ -1,4 +1,4 @@
-export const s3MonitoringPath = '/s3-monitoring'
+export const s3MonitoringPath = '/dashboard/monitoring/s3'
 
 function withQuery(path, params = {}) {
   const query = new URLSearchParams()
@@ -77,7 +77,8 @@ export function buildBreadcrumbs(bucket, path = '') {
 
   const items = [
     { text: 'Dashboard', href: '/dashboard' },
-    { text: 'S3 Monitoring', href: s3MonitoringPath },
+    { text: 'Monitoring', href: '/dashboard/monitoring' },
+    { text: 'S3', href: s3MonitoringPath },
     { text: bucket.bucketName, href: explorerUrl(bucket.clientName) }
   ]
 

@@ -22,7 +22,7 @@ vi.mock('../../auth/helpers/extract-scopes.js', () => ({
 stubFetch()
 
 const clientName = 'CadsExternalClient'
-const viewerPath = `/s3-monitoring/buckets/${clientName}/object`
+const viewerPath = `/dashboard/monitoring/s3/buckets/${clientName}/object`
 
 function objectAt(key, size = 4096) {
   return {
@@ -256,7 +256,7 @@ describe('#s3FileViewerController', () => {
     })
 
     const { response, $ } = await getPage(
-      '/s3-monitoring/buckets/NoSuchClient/object?key=a.csv'
+      '/dashboard/monitoring/s3/buckets/NoSuchClient/object?key=a.csv'
     )
 
     expect(response.statusCode).toBe(statusCodes.notFound)

@@ -1,14 +1,14 @@
-import { sqsMonitoringDashboardController } from './controller.js'
+import { monitoringController } from './controller.js'
 import { authRequired } from '../../auth/auth-required.js'
 
-export const sqsMonitoringDashboard = {
+export const monitoring = {
   plugin: {
-    name: 'sqs-monitoring',
+    name: 'monitoring',
     register(server) {
       server.route([
         {
           method: 'GET',
-          path: '/sqs-monitoring',
+          path: '/dashboard/monitoring',
           options: {
             auth: {
               strategy: 'session',
@@ -16,7 +16,7 @@ export const sqsMonitoringDashboard = {
             },
             pre: [authRequired]
           },
-          ...sqsMonitoringDashboardController
+          ...monitoringController
         }
       ])
     }

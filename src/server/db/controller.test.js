@@ -33,7 +33,7 @@ describe('#dbMonitoringDashboardController', () => {
     beforeAll(async () => {
       response = await server.inject({
         method: 'GET',
-        url: '/db-monitoring'
+        url: '/dashboard/monitoring/db'
       })
     })
 
@@ -49,11 +49,11 @@ describe('#dbMonitoringDashboardController', () => {
     async function ctsLinks(creds) {
       const response = await server.inject({
         method: 'GET',
-        url: '/db-monitoring',
+        url: '/dashboard/monitoring/db',
         auth: { strategy: 'session', credentials: creds }
       })
       return cheerio.load(response.result)(
-        'a[href="/db-monitoring/cts-import"]'
+        'a[href="/dashboard/monitoring/db/cts-import"]'
       )
     }
 

@@ -3,7 +3,7 @@
 {% block content %}
   {{ appHeading({
     text: heading,
-    caption: "Select a resource type from the list below for the corresponding dashboard."
+    caption: "Select an option from below."
   }) }}
 
   <div class="govuk-grid-row">
@@ -11,54 +11,20 @@
       <div class="govuk-body" data-testid="app-page-body">
         <main class="govuk-main-wrapper ">
             <div class="govuk-grid-row">
-              
               <div class="govuk-grid-column-one-half portal-card" data-testid="monitoring-item">
-                <a href="../db-monitoring/" class="portal-card-link">
+                <a href="dashboard/monitoring" class="portal-card-link">
                   <div class="govuk-summary-card">
                     <div class="govuk-summary-card__title-wrapper">
-                      <h2 class="govuk-summary-card__title" data-testid="monitoring-item-title">DB Monitoring</h2>
+                      <h2 class="govuk-summary-card__title" data-testid="monitoring-item-title">Monitoring</h2>
                     </div>
                     <div class="govuk-summary-card__content">
                       <p class="govuk-body-s" data-testid="monitoring-item-description">
-                        Database performance and import monitoring
+                        Monitoring dashboard for database and AWS resources.
                       </p>
                     </div>
                   </div>
                 </a>
               </div>
-
-              {% if viewModel.canViewS3 %}
-              <div class="govuk-grid-column-one-half portal-card" data-testid="monitoring-item">
-                <a href="../s3-monitoring/" class="portal-card-link">
-                  <div class="govuk-summary-card">
-                    <div class="govuk-summary-card__title-wrapper">
-                      <h2 class="govuk-summary-card__title" data-testid="monitoring-item-title">S3 Monitoring</h2>
-                    </div>
-                    <div class="govuk-summary-card__content">
-                      <p class="govuk-body-s" data-testid="monitoring-item-description">
-                        S3 folder and file monitoring
-                      </p>
-                    </div>
-                  </div>
-                </a>
-              </div>
-              {% endif %}
-
-              <div class="govuk-grid-column-one-half portal-card" data-testid="monitoring-item">
-                <a href="../sqs-monitoring/" class="portal-card-link">
-                  <div class="govuk-summary-card">
-                    <div class="govuk-summary-card__title-wrapper">
-                      <h2 class="govuk-summary-card__title" data-testid="monitoring-item-title">SQS Monitoring</h2>
-                    </div>
-                    <div class="govuk-summary-card__content">
-                      <p class="govuk-body-s" data-testid="monitoring-item-description">
-                        Message queue and DLQ monitoring
-                      </p>
-                    </div>
-                  </div>
-                </a>
-              </div>
-              
             </div>
         </main>
       </div>
