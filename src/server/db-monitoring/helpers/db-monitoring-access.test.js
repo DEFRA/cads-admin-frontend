@@ -1,7 +1,7 @@
 import {
-  canViewCtsImport,
-  requireCtsImportAccess
-} from './cts-import-access.js'
+  canViewDbMonitoring,
+  requireDbMonitoringAccess
+} from './db-monitoring-access.js'
 import { credentials } from '../../../../tests/helpers/credentials.js'
 
 const superuser = 'cads-admin-superuser'
@@ -11,10 +11,10 @@ function requestWith(creds) {
   return { auth: { credentials: creds } }
 }
 
-describe('#canViewCtsImport', () => {
+describe('#canViewDbMonitoring', () => {
   test('Should allow a superuser with the admin.db.execute scope', () => {
     expect(
-      canViewCtsImport(
+      canViewDbMonitoring(
         requestWith(credentials({ roles: [superuser], scopes: [dbExecute] }))
       )
     ).toBe(true)
@@ -22,7 +22,7 @@ describe('#canViewCtsImport', () => {
 
   test('Should deny without the cads-admin-superuser role', () => {
     expect(
-      canViewCtsImport(
+      canViewDbMonitoring(
         requestWith(credentials({ roles: ['other'], scopes: [dbExecute] }))
       )
     ).toBe(false)
@@ -30,7 +30,7 @@ describe('#canViewCtsImport', () => {
 
   test('Should deny without the admin.db.execute scope', () => {
     expect(
-      canViewCtsImport(
+      canViewDbMonitoring(
         requestWith(
           credentials({ roles: [superuser], scopes: ['admin.s3.manager'] })
         )
@@ -39,11 +39,11 @@ describe('#canViewCtsImport', () => {
   })
 
   test('Should deny an unauthenticated user', () => {
-    expect(canViewCtsImport(requestWith(null))).toBe(false)
+    expect(canViewDbMonitoring(requestWith(null))).toBe(false)
   })
 })
 
-describe('#requireCtsImportAccess', () => {
+describe('#requireDbMonitoringAccess', () => {
   const takeover = vi.fn(() => 'redirected')
   const h = {
     continue: 'continue',
@@ -55,14 +55,14 @@ describe('#requireCtsImportAccess', () => {
       credentials({ roles: [superuser], scopes: [dbExecute] })
     )
 
-    expect(requireCtsImportAccess(request, h)).toBe('continue')
+    expect(requireDbMonitoringAccess(request, h)).toBe('continue')
     expect(h.redirect).not.toHaveBeenCalled()
   })
 
   test('Should redirect to the Unauthorised page otherwise', () => {
     const request = requestWith(credentials({ roles: [superuser] }))
 
-    expect(requireCtsImportAccess(request, h)).toBe('redirected')
+    expect(requireDbMonitoringAccess(request, h)).toBe('redirected')
     expect(h.redirect).toHaveBeenCalledWith('/unauthorised')
   })
 })

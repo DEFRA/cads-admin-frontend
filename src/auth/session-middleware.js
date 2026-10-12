@@ -83,7 +83,7 @@ async function refreshTokenIfNeeded(session, sessionId, request) {
   }
 
   try {
-    const oidcClient = getOidcClient()
+    const oidcClient = await getOidcClient()
     const refreshedToken = await oidcClient.refresh(tokenSet.refresh_token, {
       exchangeBody: { scope: getAuthConfig().exchangeScope }
     })
@@ -92,9 +92,10 @@ async function refreshTokenIfNeeded(session, sessionId, request) {
       refreshedToken.refresh_token ?? tokenSet.refresh_token
 
     tokenSet = refreshedToken
-    user = refreshedToken.claims()
-
     permissions = []
+
+    const claims = refreshedToken.claims()
+    user = { ...claims, roles: extractRoles(claims), permissions }
 
     // Save updated session
     await setSession(sessionId, {
@@ -102,11 +103,7 @@ async function refreshTokenIfNeeded(session, sessionId, request) {
       userSub: session.userSub,
       tokenSet,
       resourceTokens: session.resourceTokens,
-      user: {
-        ...user,
-        roles: extractRoles(user),
-        permissions
-      }
+      user
     })
 
     return { tokenSet, user, permissions }

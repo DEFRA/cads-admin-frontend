@@ -10,9 +10,12 @@ function accessToken(claims) {
   return `${encode({ alg: 'none' })}.${encode(claims)}.signature`
 }
 
-function credentials(scp) {
-  return { tokenSet: { access_token: accessToken({ scp }) } }
+function credentials(scp, roles = []) {
+  return { user: { roles }, tokenSet: { access_token: accessToken({ scp }) } }
 }
+
+const dbAdmin = () =>
+  credentials('admin.db.execute admin.s3.manager', ['cads-admin-superuser'])
 
 describe('#buildNavigation', () => {
   test('Should provide expected navigation details for unauthenticated user', () => {
@@ -34,7 +37,7 @@ describe('#buildNavigation', () => {
       buildNavigation(
         mockRequest({
           path: '/dashboard',
-          auth: { credentials: credentials('admin.s3.manager') }
+          auth: { credentials: dbAdmin() }
         })
       )
     ).toEqual([
@@ -90,16 +93,34 @@ describe('#buildNavigation', () => {
     )
   })
 
-  test('Should highlight DB Monitoring on its sub pages', () => {
+  test.each([
+    '/db-monitoring/cts-import',
+    '/db-monitoring/postgres-performance',
+    '/db-monitoring/postgres-performance/active_queries'
+  ])('Should highlight DB Monitoring on its sub page %s', (path) => {
     const navigation = buildNavigation(
-      mockRequest({
-        path: '/db-monitoring/cts-import',
-        auth: { credentials: credentials('admin.db.execute') }
-      })
+      mockRequest({ path, auth: { credentials: dbAdmin() } })
     )
 
     expect(navigation.find((item) => item.text === 'DB Monitoring')).toEqual(
       expect.objectContaining({ current: true })
     )
+  })
+
+  test.each([
+    [
+      'the cads-admin-superuser role',
+      credentials('admin.db.execute', ['other-role'])
+    ],
+    [
+      'the admin.db.execute scope',
+      credentials('admin.s3.manager', ['cads-admin-superuser'])
+    ]
+  ])('Should hide DB Monitoring without %s', (_, creds) => {
+    const navigation = buildNavigation(
+      mockRequest({ path: '/dashboard', auth: { credentials: creds } })
+    )
+
+    expect(navigation.map((item) => item.text)).not.toContain('DB Monitoring')
   })
 })

@@ -1,0 +1,61 @@
+@use "govuk-frontend" as *;
+
+// Horizontal sub-navigation between the pages of a tab, styled after the
+// MOJ Frontend sub navigation pattern
+.app-sub-navigation {
+  margin-bottom: govuk-spacing(6);
+  border-bottom: 1px solid $govuk-border-colour;
+}
+
+.app-sub-navigation__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @include govuk-media-query($from: tablet) {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
+
+.app-sub-navigation__item {
+  @include govuk-font($size: 19);
+  margin: 0;
+
+  @include govuk-media-query($from: tablet) {
+    margin-right: govuk-spacing(6);
+  }
+}
+
+.app-sub-navigation__link {
+  @include govuk-link-common;
+  @include govuk-link-style-no-visited-state;
+  display: block;
+  padding: govuk-spacing(2) 0 govuk-spacing(2) govuk-spacing(3);
+  border-left: 4px solid transparent;
+  text-decoration: none;
+
+  @include govuk-media-query($from: tablet) {
+    padding: govuk-spacing(2) 0;
+    border-bottom: 4px solid transparent;
+    border-left: 0;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &[aria-current="page"] {
+    border-left-color: $govuk-link-colour;
+    color: $govuk-link-active-colour;
+    font-weight: $govuk-font-weight-bold;
+
+    @include govuk-media-query($from: tablet) {
+      border-bottom-color: $govuk-link-colour;
+    }
+  }
+
+  &:focus {
+    @include govuk-focused-text;
+  }
+}

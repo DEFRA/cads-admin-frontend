@@ -1,5 +1,6 @@
 import { hasScope } from '../../../auth/helpers/extract-scopes.js'
 import { resourceScopes } from '../../../auth/constants/resource-scopes.js'
+import { canViewDbMonitoring } from '../../../server/db-monitoring/helpers/db-monitoring-access.js'
 
 function isCurrent(request, path) {
   return request?.path === path || request?.path?.startsWith(`${path}/`)
@@ -18,11 +19,15 @@ export function buildNavigation(request) {
       href: '/dashboard',
       current: request?.path === '/dashboard'
     },
-    {
-      text: 'DB Monitoring',
-      href: '/db-monitoring',
-      current: isCurrent(request, '/db-monitoring')
-    },
+    ...(canViewDbMonitoring(request)
+      ? [
+          {
+            text: 'DB Monitoring',
+            href: '/db-monitoring',
+            current: isCurrent(request, '/db-monitoring')
+          }
+        ]
+      : []),
     ...(hasScope(request, resourceScopes.cadsCds.adminS3Manager)
       ? [
           {

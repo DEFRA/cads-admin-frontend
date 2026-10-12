@@ -1,0 +1,51 @@
+@use "govuk-frontend" as *;
+
+.app-chart__figure {
+  margin: 0 0 govuk-spacing(4);
+}
+
+// The chart SVG keeps a fixed aspect ratio from its viewBox, so it scales to
+// the width of its column
+.app-chart__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.app-chart__axis {
+  @include govuk-font($size: 16);
+  color: $govuk-secondary-text-colour;
+
+  text {
+    fill: $govuk-text-colour;
+    font-family: inherit;
+    font-size: inherit;
+  }
+}
+
+.app-chart__legend {
+  @include govuk-font($size: 16);
+  display: flex;
+  flex-wrap: wrap;
+  margin: govuk-spacing(2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-chart__legend-item {
+  display: flex;
+  align-items: center;
+  margin-right: govuk-spacing(4);
+  margin-bottom: govuk-spacing(1);
+}
+
+.app-chart__legend-swatch {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-right: govuk-spacing(1);
+  // Keeps the key visible in forced colours mode
+  border: 1px solid transparent;
+}

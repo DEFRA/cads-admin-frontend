@@ -30,8 +30,9 @@ vi.mock('../../../src/auth/session-store.js', () => ({
 const mockRefresh = vi.fn()
 const mockOidcClient = { refresh: mockRefresh }
 
+// getOidcClient is async, so resolve the client as the real module does
 vi.mock('../../../src/auth/oidc-client.js', () => ({
-  getOidcClient: vi.fn(() => mockOidcClient)
+  getOidcClient: vi.fn(async () => mockOidcClient)
 }))
 
 // Mock auth config (scope sent on refresh)
@@ -160,6 +161,38 @@ describe('sessionMiddleware', () => {
     expect(mockSetSession).toHaveBeenCalled()
     expect(request.auth.credentials.user.permissions).toEqual([])
     expect(result).toBe('continue')
+  })
+
+  it('keeps the roles from the refreshed token claims', async () => {
+    mockExpired.mockReturnValue(true)
+
+    mockGetSession.mockResolvedValue({
+      tokenSet: { refresh_token: 'rtoken1' },
+      user: { name: 'John Doe', roles: ['cads-admin-superuser'] },
+      userSub: '12345'
+    })
+
+    // The OIDC mock sends `role` rather than Azure AD's `roles`
+    mockRefresh.mockResolvedValue({
+      refresh_token: 'rtoken2',
+      claims: () => ({ name: 'John Doe', role: 'cads-admin-superuser' })
+    })
+
+    const request = createRequest()
+    const h = createH()
+
+    await sessionMiddleware(request, h)
+
+    expect(mockDropSession).not.toHaveBeenCalled()
+    expect(request.auth.credentials.user.roles).toEqual([
+      'cads-admin-superuser'
+    ])
+    expect(mockSetSession).toHaveBeenCalledWith(
+      '12345',
+      expect.objectContaining({
+        user: expect.objectContaining({ roles: ['cads-admin-superuser'] })
+      })
+    )
   })
 
   it('drops session when refresh fails', async () => {
