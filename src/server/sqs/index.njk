@@ -1,20 +1,54 @@
 {% extends 'layouts/page.njk' %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
 
 {% block content %}
   {{ appHeading({
     text: heading,
-    caption: "Message queue and DLQ monitoring."
+    caption: "Explore the AWS queues used by CADS Data Service and CADS Bridge. This view is read-only."
   }) }}
 
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column">
-      <div class="govuk-body" data-testid="app-page-body">
-        <main class="govuk-main-wrapper ">
-            <div class="govuk-grid-row">
-            </div>
-        </main>
-      </div>
-    </div>
-  </div>
+  {% set head = [
+    {
+      text: "Name"
+    },
+    {
+      text: "Queue"
+    },
+    {
+      text: "DLQ"
+    },
+    {
+      html: '<span class="govuk-visually-hidden">Actions</span>'
+    }
+  ] %}
+
+  {% for queueService in viewModel.queuesByService %}
+    {% if queueService.adminEnabled %}
+      {% set rows = [] %}
+      {% for queue in queueService.queues %}
+        {% set row = [
+          { text: queue.name, classes: "app-break-word" },
+          { text: queue.queueName, classes: "app-break-word" },
+          { text: queue.dlqName, classes: "app-break-word" },
+          {
+            html: '<a href="' + queue.exploreUrl + '" class="govuk-link">Explore<span class="govuk-visually-hidden"> '
+              + (queue.queueName | escape) + '</span></a>'
+          }
+        ] %}
+        {% set _ = rows.push(row) %}
+      {% endfor %}
+      {{ govukTable({
+          caption: queueService.name,
+          captionClasses: "govuk-table__caption--m",
+          firstCellIsHeader: true,
+          head: head,
+          rows: rows,
+          attributes: { "data-testid": "bucket-table" }
+        }) }}
+    {% else %}
+      <h2 class="govuk-heading-m" data-testid="no-buckets-heading">{{queueService.name}}</h2>
+      <p class="govuk-body" data-testid="no-buckets">Administration API is not available for this service</p>
+    {% endif %}
+  {% endfor %}
 
 {% endblock %}
