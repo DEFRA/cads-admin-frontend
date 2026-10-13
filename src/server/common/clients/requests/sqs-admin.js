@@ -1,5 +1,6 @@
 import { createApiClient } from '../api-client.js'
 import { getConfig } from '../../../../config/config.js'
+import {statusCodes} from "../../constants/status-codes.js";
 
 // Read-only queue management endpoints in cads-data-service and cads-bridge
 const basePath = '/api/v1/systemadmin/sqs'
@@ -39,7 +40,7 @@ async function getQueueDetails(client, clientName, requestPath) {
       }))
     }
   } catch (error) {
-    if (error.output.statusCode === 404) {
+    if (error.output.statusCode === statusCodes.notFound) {
       return {
         name: clientName,
         adminEnabled: false,
