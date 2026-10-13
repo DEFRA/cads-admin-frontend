@@ -1,6 +1,6 @@
 import { createApiClient } from '../api-client.js'
 import { getConfig } from '../../../../config/config.js'
-import {statusCodes} from "../../constants/status-codes.js";
+import { statusCodes } from '../../constants/status-codes.js'
 
 // Read-only queue management endpoints in cads-data-service and cads-bridge
 const basePath = '/api/v1/systemadmin/sqs'
