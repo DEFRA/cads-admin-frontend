@@ -1,5 +1,17 @@
+import { listQueues } from '../common/clients/requests/sqs-admin.js'
+import Boom from '@hapi/boom'
+
 export const sqsMonitoringDashboardController = {
   async handler(_request, h) {
+    let queuesByService
+    try {
+      queuesByService = await listQueues(_request)
+    } catch (error) {
+      return Boom.badRequest(
+        'Failed to fetch SQS queues. Please try again later.'
+      )
+    }
+
     return h.view('sqs/index', {
       pageTitle: 'SQS Monitoring',
       heading: 'Message queue and DLQ monitoring',
@@ -16,7 +28,9 @@ export const sqsMonitoringDashboardController = {
           text: 'SQS'
         }
       ],
-      viewModel: {}
+      viewModel: {
+        queuesByService
+      }
     })
   }
 }
