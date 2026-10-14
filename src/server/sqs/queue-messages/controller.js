@@ -1,5 +1,5 @@
 export const sqsQueueMessagesController = {
-  async handler(request, h) {
+  async handler(_request, h) {
     return h.view('./index', {
       pageTitle: 'SQS Monitoring',
       heading: 'Message queue and DLQ monitoring',
@@ -14,7 +14,7 @@ export const sqsQueueMessagesController = {
         },
         {
           text: 'SQS',
-          href: '/dashboard/monitoring'
+          href: '/dashboard/monitoring/sqs'
         },
         {
           text: 'Messages'
