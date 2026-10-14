@@ -1,0 +1,56 @@
+{% extends 'layouts/page.njk' %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+
+{% block content %}
+  {{ appHeading({
+    text: heading,
+    caption: "Metrics for the queue and dead letter queue (DLQ). This view is read-only."
+  }) }}
+
+  {% set head = [
+    {
+      text: ""
+    },
+    {
+      text: "Approximate number of messages",
+      format: "numeric"
+    },
+    {
+      text: "Approximate number of messages not visible",
+      format: "numeric"
+    },
+    {
+      text: "Approximate number of messages delayed",
+      format: "numeric"
+    },
+    {
+      text: "Oldest message age in seconds",
+      format: "numeric"
+    }
+  ] %}
+  {% set rows = [
+    [
+      { text: "Queue" },
+      { text: viewModel.queueMetrics.metrics.approximateNumberOfMessages, format: "numeric" },
+      { text: viewModel.queueMetrics.metrics.approximateNumberOfMessagesNotVisible, format: "numeric" },
+      { text: viewModel.queueMetrics.metrics.approximateNumberOfMessagesDelayed, format: "numeric" },
+      { text: viewModel.queueMetrics.metrics.oldestMessageAgeSeconds, format: "numeric" }
+    ],
+    [
+      { text: "DLQ" },
+      { text: viewModel.dlqMetrics.metrics.approximateNumberOfMessages, format: "numeric" },
+      { text: viewModel.dlqMetrics.metrics.approximateNumberOfMessagesNotVisible, format: "numeric" },
+      { text: viewModel.dlqMetrics.metrics.approximateNumberOfMessagesDelayed, format: "numeric" },
+      { text: viewModel.dlqMetrics.metrics.oldestMessageAgeSeconds, format: "numeric" }
+    ]
+  ] %}
+
+  {{ govukTable({
+      caption: viewModel.queueMetrics.queue,
+      captionClasses: "govuk-table__caption--m",
+      firstCellIsHeader: true,
+      head: head,
+      rows: rows,
+      attributes: { "data-testid": "queue-table" }
+    }) }}
+{% endblock %}
