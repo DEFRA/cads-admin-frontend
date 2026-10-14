@@ -1,7 +1,6 @@
 import { createServer } from '../../server.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { getQueueMetrics } from '../../common/clients/requests/sqs-admin.js'
-import { sqsQueueMetricsController } from './controller.js'
 
 vi.mock('../../../auth/auth-required.js', () => ({
   authRequired: vi.fn((_req, h) => h.continue)
