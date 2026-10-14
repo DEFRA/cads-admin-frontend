@@ -54,15 +54,11 @@ async function getQueueDetails(client, clientName, requestPath) {
   }
 }
 
-export async function queueMetrics(request, clientName, queueName) {
+export async function getQueueMetrics(request, clientName, queueName) {
   const client =
     clientName === cadsCdsClientName
       ? cadsCdsClient(request)
       : cadsBridgeClient(request)
-  return await getQueueMetrics(client, clientName, queueName)
-}
-
-async function getQueueMetrics(client, clientName, queueName) {
   const queuePath = `${basePath}/queues/${queueName}/metrics`
   const dqlPath = `${basePath}/queues/${queueName}/dlq/metrics`
   try {

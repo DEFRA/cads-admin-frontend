@@ -1,9 +1,9 @@
-import { queueMetrics } from '../../common/clients/requests/sqs-admin.js'
+import { getQueueMetrics } from '../../common/clients/requests/sqs-admin.js'
 
 export const sqsQueueMetricsController = {
   async handler(request, h) {
     const { client, queueName } = request.params
-    const [queueMetricsData, dlqMetricsData] = await queueMetrics(
+    const [queueMetricsData, dlqMetricsData] = await getQueueMetrics(
       request,
       client,
       queueName
