@@ -6,6 +6,10 @@ vi.mock('../../auth/auth-required.js', () => ({
   authRequired: vi.fn((_req, h) => h.continue)
 }))
 
+vi.mock('../../auth/helpers/extract-scopes.js', () => ({
+  hasAnyScope: vi.fn(() => true)
+}))
+
 vi.mock('../common/clients/requests/sqs-admin.js', () => ({
   listQueues: vi.fn()
 }))
