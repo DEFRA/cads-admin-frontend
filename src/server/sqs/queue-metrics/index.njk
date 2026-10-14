@@ -53,4 +53,7 @@
       rows: rows,
       attributes: { "data-testid": "queue-table" }
     }) }}
+
+  <pre>{{ viewModel.queueMetrics | dump }}</pre>
+  <pre>{{ viewModel.dlqMetrics | dump }}</pre>
 {% endblock %}

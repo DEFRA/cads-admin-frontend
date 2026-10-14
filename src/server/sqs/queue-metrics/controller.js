@@ -9,7 +9,7 @@ export const sqsQueueMetricsController = {
       queueName
     )
     return h.view('sqs/queue-metrics/index', {
-      pageTitle: 'SQS Monitoring',
+      pageTitle: 'SQS Metrics',
       heading: 'Message queue and DLQ monitoring',
       breadcrumbs: [
         {
