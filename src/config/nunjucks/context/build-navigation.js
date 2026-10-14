@@ -1,6 +1,5 @@
-import { hasScope } from '../../../auth/helpers/extract-scopes.js'
+import { hasAnyScope } from '../../../auth/helpers/extract-scopes.js'
 import { resourceScopes } from '../../../auth/constants/resource-scopes.js'
-import { canViewDbMonitoring } from '../../../server/db-monitoring/helpers/db-monitoring-access.js'
 
 function isCurrent(request, path) {
   return request?.path === path || request?.path?.startsWith(`${path}/`)
@@ -13,35 +12,29 @@ export function buildNavigation(request) {
     return []
   }
 
+  const hasMonitoringScope = hasAnyScope(request, [
+    resourceScopes.cadsCds.adminQueueManager,
+    resourceScopes.cadsCds.adminS3Manager,
+    resourceScopes.cadsCds.dbAdminExecute,
+    resourceScopes.cadsBridge.adminQueueManager,
+    resourceScopes.cadsBridge.adminS3Manager
+  ])
+
   return [
     {
       text: 'Dashboard',
       href: '/dashboard',
       current: request?.path === '/dashboard'
     },
-    ...(canViewDbMonitoring(request)
+    ...(hasMonitoringScope
       ? [
           {
-            text: 'DB Monitoring',
-            href: '/db-monitoring',
-            current: isCurrent(request, '/db-monitoring')
+            text: 'Monitoring',
+            href: '/dashboard/monitoring',
+            current: isCurrent(request, '/dashboard/monitoring')
           }
         ]
       : []),
-    ...(hasScope(request, resourceScopes.cadsCds.adminS3Manager)
-      ? [
-          {
-            text: 'S3 Monitoring',
-            href: '/s3-monitoring',
-            current: isCurrent(request, '/s3-monitoring')
-          }
-        ]
-      : []),
-    {
-      text: 'SQS Monitoring',
-      href: '/sqs-monitoring',
-      current: request?.path === '/sqs-monitoring'
-    },
     {
       text: 'Sign out',
       href: '/logout',

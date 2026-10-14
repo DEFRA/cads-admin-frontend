@@ -3,9 +3,10 @@ import inert from '@hapi/inert'
 import { home } from './home/index.js'
 import { health } from './health/index.js'
 import { dashboard } from './dashboard/index.js'
-import { dbMonitoringDashboard } from './db-monitoring/index.js'
-import { s3MonitoringDashboard } from './s3-monitoring/index.js'
-import { sqsMonitoringDashboard } from './sqs-monitoring/index.js'
+import { monitoring } from './monitoring/index.js'
+import { dbMonitoringDashboard } from './db/index.js'
+import { s3MonitoringDashboard } from './s3/index.js'
+import { sqsMonitoringDashboard } from './sqs/index.js'
 import { unauthorised } from './unauthorised/index.js'
 
 import { getStaticFilesToServe } from './common/helpers/serve-static-files.js'
@@ -23,6 +24,7 @@ export const router = {
       await server.register([
         home,
         dashboard,
+        monitoring,
         dbMonitoringDashboard,
         s3MonitoringDashboard,
         sqsMonitoringDashboard,

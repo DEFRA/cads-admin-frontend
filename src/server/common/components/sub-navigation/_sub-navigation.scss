@@ -1,4 +1,4 @@
-@use "govuk-frontend" as *;
+@use 'govuk-frontend' as *;
 
 // Horizontal sub-navigation between the pages of a tab, styled after the
 // MOJ Frontend sub navigation pattern
@@ -45,7 +45,7 @@
     text-decoration: underline;
   }
 
-  &[aria-current="page"] {
+  &[aria-current='page'] {
     border-left-color: $govuk-link-colour;
     color: $govuk-link-active-colour;
     font-weight: $govuk-font-weight-bold;

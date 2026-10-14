@@ -5,7 +5,7 @@ const chartCard = {
   command: 'sessions_by_state',
   title: 'Sessions by state',
   description: 'Number of database sessions in each connection state.',
-  detailHref: '/db-monitoring/postgres-performance/sessions_by_state',
+  detailHref: '/dashboard/monitoring/db/postgres-performance/sessions_by_state',
   chart: {
     type: 'bar',
     label: 'Bar chart showing sessions by state',
@@ -36,7 +36,7 @@ describe('Chart Component', () => {
     )
     const link = $card('[data-testid="metric-detail-link"]')
     expect(link.attr('href')).toBe(
-      '/db-monitoring/postgres-performance/sessions_by_state'
+      '/dashboard/monitoring/db/postgres-performance/sessions_by_state'
     )
     expect(link.text()).toBe('View details for sessions by state')
   })

@@ -103,16 +103,13 @@ describe('DB Monitoring access with the OIDC mock', () => {
       headers: { host: new URL(appOrigin).host, ...(cookie ? { cookie } : {}) }
     })
 
-  async function navigationText(cookie) {
-    const response = await get('/dashboard', cookie)
-    return cheerio
-      .load(response.result)('.govuk-service-navigation__item')
-      .map((_, item) => cheerio.load(item).text().trim())
-      .get()
+  async function dbMonitoringCards(cookie) {
+    const response = await get('/dashboard/monitoring', cookie)
+    return cheerio.load(response.result)('a[href="monitoring/db"]')
   }
 
   test('Should send an unauthenticated user to sign in', async () => {
-    const response = await get('/db-monitoring/postgres-performance')
+    const response = await get('/dashboard/monitoring/db/postgres-performance')
 
     expect(response.statusCode).toBe(302)
     expect(response.headers.location).toBe('/login')
@@ -125,14 +122,16 @@ describe('DB Monitoring access with the OIDC mock', () => {
       cookie = await signIn(server, oidcUsers.admin)
     })
 
-    test('Should show the DB Monitoring tab', async () => {
-      expect(await navigationText(cookie)).toContain('DB Monitoring')
+    test('Should show the DB Monitoring card', async () => {
+      expect(await dbMonitoringCards(cookie)).toHaveLength(1)
     })
 
     test('Should open the tab on the Postgres Performance Monitoring page', async () => {
-      const tab = await get('/db-monitoring', cookie)
+      const tab = await get('/dashboard/monitoring/db', cookie)
       expect(tab.statusCode).toBe(302)
-      expect(tab.headers.location).toBe('/db-monitoring/postgres-performance')
+      expect(tab.headers.location).toBe(
+        '/dashboard/monitoring/db/postgres-performance'
+      )
 
       const page = await get(tab.headers.location, cookie)
       expect(page.statusCode).toBe(200)
@@ -143,7 +142,7 @@ describe('DB Monitoring access with the OIDC mock', () => {
     })
 
     test('Should call the backend with the signed-in user token', async () => {
-      await get('/db-monitoring/postgres-performance', cookie)
+      await get('/dashboard/monitoring/db/postgres-performance', cookie)
 
       expect(cds.calls.length).toBeGreaterThan(0)
       for (const call of cds.calls) {
@@ -167,18 +166,15 @@ describe('DB Monitoring access with the OIDC mock', () => {
       cookie = await signIn(server, user, { removeScopes })
     })
 
-    test('Should hide the DB Monitoring tab', async () => {
-      const navigation = await navigationText(cookie)
-
-      expect(navigation).toContain('Dashboard')
-      expect(navigation).not.toContain('DB Monitoring')
+    test('Should hide the DB Monitoring card', async () => {
+      expect(await dbMonitoringCards(cookie)).toHaveLength(0)
     })
 
     test.each([
-      '/db-monitoring',
-      '/db-monitoring/postgres-performance',
-      '/db-monitoring/postgres-performance/active_queries',
-      '/db-monitoring/cts-import'
+      '/dashboard/monitoring/db',
+      '/dashboard/monitoring/db/postgres-performance',
+      '/dashboard/monitoring/db/postgres-performance/active_queries',
+      '/dashboard/monitoring/db/cts-import'
     ])('Should redirect %s to the Unauthorised page', async (url) => {
       const response = await get(url, cookie)
 
@@ -196,7 +192,7 @@ describe('DB Monitoring access with the OIDC mock', () => {
     test('Should not run an action', async () => {
       const response = await server.inject({
         method: 'POST',
-        url: '/db-monitoring/postgres-performance/actions/cancel-query',
+        url: '/dashboard/monitoring/db/postgres-performance/actions/cancel-query',
         headers: {
           host: new URL(appOrigin).host,
           cookie,

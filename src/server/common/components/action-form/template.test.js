@@ -7,7 +7,8 @@ describe('Action form Component', () => {
     description: 'Stops the query a session is running.',
     buttonText: 'Cancel query',
     requiresPid: true,
-    formAction: '/db-monitoring/postgres-performance/actions/cancel-query'
+    formAction:
+      '/dashboard/monitoring/db/postgres-performance/actions/cancel-query'
   }
 
   test('Should post to the action with a PID input and button', () => {
@@ -54,7 +55,7 @@ describe('Action form Component', () => {
       buttonText: 'Reset query statistics',
       buttonClasses: 'govuk-button--warning',
       requiresPid: false,
-      formAction: '/db-monitoring/postgres-performance/actions/reset'
+      formAction: '/dashboard/monitoring/db/postgres-performance/actions/reset'
     })
 
     expect($form('input[name="pid"]')).toHaveLength(0)

@@ -7,8 +7,12 @@ describe('Sub navigation Component', () => {
     $nav = renderComponent('sub-navigation', {
       label: 'DB Monitoring',
       items: [
-        { text: 'Postgres', href: '/db-monitoring/postgres', current: true },
-        { text: 'CTS import', href: '/db-monitoring/cts-import' }
+        {
+          text: 'Postgres',
+          href: '/dashboard/monitoring/db/postgres',
+          current: true
+        },
+        { text: 'CTS import', href: '/dashboard/monitoring/db/cts-import' }
       ]
     })
   })
@@ -23,8 +27,8 @@ describe('Sub navigation Component', () => {
         .map((_, link) => [[$nav(link).attr('href'), $nav(link).text()]])
         .get()
     ).toEqual([
-      ['/db-monitoring/postgres', 'Postgres'],
-      ['/db-monitoring/cts-import', 'CTS import']
+      ['/dashboard/monitoring/db/postgres', 'Postgres'],
+      ['/dashboard/monitoring/db/cts-import', 'CTS import']
     ])
   })
 
