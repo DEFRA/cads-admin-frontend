@@ -4,6 +4,9 @@ import { formatValue } from './format.js'
 
 const svgNamespace = 'http://www.w3.org/2000/svg'
 
+// Below this, the axis labels no longer fit
+const minimumWidth = 280
+
 let frameCount = 0
 
 /**
@@ -43,7 +46,8 @@ export function describeChart(chart) {
  */
 export function createChartFrame(figure, chart, size) {
   const { width, height, margin } = size
-  const id = `app-chart-${++frameCount}`
+  frameCount += 1
+  const id = `app-chart-${frameCount}`
 
   const svg = select(figure)
     .append('svg')
@@ -79,7 +83,7 @@ export function createChartFrame(figure, chart, size) {
  * @param {number} fallback
  */
 export function chartWidth(figure, fallback) {
-  return Math.max(figure.clientWidth || fallback, 280)
+  return Math.max(figure.clientWidth || fallback, minimumWidth)
 }
 
 /**

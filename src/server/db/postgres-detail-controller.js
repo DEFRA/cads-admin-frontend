@@ -1,6 +1,5 @@
 import Boom from '@hapi/boom'
 
-import { statusCodes } from '../common/constants/status-codes.js'
 import { findPostgresMetric } from './helpers/postgres-metrics.js'
 import { postgresActions } from './helpers/postgres-actions.js'
 import {
@@ -8,7 +7,8 @@ import {
   actionErrorList,
   buildActionForms,
   buildMetricCard,
-  loadMetricResults
+  loadMetricResults,
+  statusCodeFor
 } from './helpers/postgres-view-model.js'
 import { buildDbMonitoringSubNavigation } from './helpers/sub-navigation.js'
 import {
@@ -43,13 +43,6 @@ export async function renderPostgresDetail(request, h, command, options = {}) {
     ...(loaded.error ? [{ text: card.error }] : [])
   ]
 
-  let statusCode = statusCodes.ok
-  if (actionError) {
-    statusCode = statusCodes.badRequest
-  } else if (loaded.error) {
-    statusCode = loaded.error.statusCode
-  }
-
   return h
     .view('db/postgres-detail', {
       pageTitle: errorList.length ? `Error: ${metric.title}` : metric.title,
@@ -78,7 +71,7 @@ export async function renderPostgresDetail(request, h, command, options = {}) {
           : []
       }
     })
-    .code(statusCode)
+    .code(statusCodeFor(actionError, loaded.error))
 }
 
 export const postgresDetailController = {

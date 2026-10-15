@@ -27,7 +27,9 @@ describe('#parseInterval', () => {
     ['1 day 02:03:04', 93784],
     ['3 days', 259200],
     ['2 days 00:00:01', 172801],
-    ['-00:00:02', -2]
+    ['-00:00:02', -2],
+    ['-1 days +02:00:00', -79200],
+    ['2 hours 30 mins', 9000]
   ])('Should parse %s as %d seconds', (value, seconds) => {
     expect(parseInterval(value)).toBeCloseTo(seconds)
   })

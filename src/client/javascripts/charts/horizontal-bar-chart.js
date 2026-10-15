@@ -4,8 +4,14 @@ import { chartWidth, createChartFrame } from './chart-frame.js'
 import { formatTick, formatValue, truncate } from './format.js'
 import { axisColour, seriesColour } from './palette.js'
 
-const labelLength = 28
+// Sizes are in SVG units
+const defaultWidth = 720
+const margin = { top: 10, right: 30, bottom: 35, left: 210 }
 const rowHeight = 28
+const minimumPlotHeight = 80
+const labelLength = 28
+const barPadding = 0.25
+const valueTicks = 5
 
 /**
  * Horizontal bar chart for a single series of ranked items, e.g. the
@@ -21,9 +27,12 @@ export function renderHorizontalBarChart(figure, chart) {
     figure,
     chart,
     {
-      width: chartWidth(figure, 720),
-      height: Math.max(chart.categories.length * rowHeight, 80) + 45,
-      margin: { top: 10, right: 30, bottom: 35, left: 210 }
+      width: chartWidth(figure, defaultWidth),
+      height:
+        Math.max(chart.categories.length * rowHeight, minimumPlotHeight) +
+        margin.top +
+        margin.bottom,
+      margin
     }
   )
 
@@ -31,7 +40,7 @@ export function renderHorizontalBarChart(figure, chart) {
   // two queries from one application, still get their own bars
   const keys = chart.categories.map((_, index) => index)
 
-  const y = scaleBand().domain(keys).range([0, innerHeight]).padding(0.25)
+  const y = scaleBand().domain(keys).range([0, innerHeight]).padding(barPadding)
 
   const x = scaleLinear()
     .domain([0, chart.maxValue ?? (max(series.values) || 1)])
@@ -54,7 +63,7 @@ export function renderHorizontalBarChart(figure, chart) {
     .append('g')
     .attr('class', 'app-chart__axis')
     .attr('transform', `translate(0,${innerHeight})`)
-    .call(axisBottom(x).ticks(5).tickFormat(formatTick))
+    .call(axisBottom(x).ticks(valueTicks).tickFormat(formatTick))
 
   plot
     .append('g')

@@ -1,4 +1,3 @@
-import { statusCodes } from '../common/constants/status-codes.js'
 import {
   buildHeadlineFigures,
   postgresMetrics,
@@ -11,7 +10,8 @@ import {
   buildActionForms,
   buildMetricCard,
   loadMetricResults,
-  pageErrorFor
+  pageErrorFor,
+  statusCodeFor
 } from './helpers/postgres-view-model.js'
 import { buildDbMonitoringSubNavigation } from './helpers/sub-navigation.js'
 import { dbMonitoringPath, monitoringPath } from './paths.js'
@@ -55,13 +55,6 @@ export async function renderPostgresPerformance(request, h, options = {}) {
     ...(pageError ? [{ text: pageError.message }] : [])
   ]
 
-  let statusCode = statusCodes.ok
-  if (actionError) {
-    statusCode = statusCodes.badRequest
-  } else if (pageError) {
-    statusCode = pageError.statusCode
-  }
-
   return h
     .view('db/postgres-performance', {
       pageTitle: errorList.length ? `Error: ${pageTitle}` : pageTitle,
@@ -76,7 +69,7 @@ export async function renderPostgresPerformance(request, h, options = {}) {
         actions: buildActionForms(postgresActions, { actionError })
       }
     })
-    .code(statusCode)
+    .code(statusCodeFor(actionError, pageError))
 }
 
 export const postgresPerformanceController = {

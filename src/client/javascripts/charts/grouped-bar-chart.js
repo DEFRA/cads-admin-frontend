@@ -4,6 +4,18 @@ import { appendLegend, chartWidth, createChartFrame } from './chart-frame.js'
 import { formatTick, formatValue, truncate } from './format.js'
 import { axisColour, seriesColour } from './palette.js'
 
+// Sizes are in SVG units
+const defaultWidth = 720
+const height = 300
+const margin = { top: 10, right: 20, bottom: 45, left: 70 }
+// Rotated category labels need more room below the axis
+const rotatedLabelsBottom = 90
+const longLabelLength = 12
+const labelLength = 20
+const groupPadding = 0.25
+const barPadding = 0.1
+const valueTicks = 5
+
 /**
  * Grouped bar chart comparing several series per category, e.g. commits
  * and rollbacks per database.
@@ -12,27 +24,29 @@ import { axisColour, seriesColour } from './palette.js'
  * @param {{ label: string, maxValue: number | null, categories: string[], series: { name: string, values: number[] }[] }} chart
  */
 export function renderGroupedBarChart(figure, chart) {
-  const longLabels = chart.categories.some((category) => category.length > 12)
+  const longLabels = chart.categories.some(
+    (category) => category.length > longLabelLength
+  )
 
   const { svg, plot, innerWidth, innerHeight } = createChartFrame(
     figure,
     chart,
     {
-      width: chartWidth(figure, 720),
-      height: 300,
-      margin: { top: 10, right: 20, bottom: longLabels ? 90 : 45, left: 70 }
+      width: chartWidth(figure, defaultWidth),
+      height,
+      margin: longLabels ? { ...margin, bottom: rotatedLabelsBottom } : margin
     }
   )
 
   const x0 = scaleBand()
     .domain(chart.categories.map((_, index) => index))
     .range([0, innerWidth])
-    .padding(0.25)
+    .padding(groupPadding)
 
   const x1 = scaleBand()
     .domain(chart.series.map((_, index) => index))
     .range([0, x0.bandwidth()])
-    .padding(0.1)
+    .padding(barPadding)
 
   const highest = max(chart.series, (series) => max(series.values))
   const y = scaleLinear()
@@ -46,7 +60,7 @@ export function renderGroupedBarChart(figure, chart) {
     .attr('transform', `translate(0,${innerHeight})`)
     .call(
       axisBottom(x0).tickFormat((index) =>
-        truncate(chart.categories[index], 20)
+        truncate(chart.categories[index], labelLength)
       )
     )
 
@@ -62,7 +76,7 @@ export function renderGroupedBarChart(figure, chart) {
   plot
     .append('g')
     .attr('class', 'app-chart__axis')
-    .call(axisLeft(y).ticks(5).tickFormat(formatTick))
+    .call(axisLeft(y).ticks(valueTicks).tickFormat(formatTick))
 
   plot
     .append('g')

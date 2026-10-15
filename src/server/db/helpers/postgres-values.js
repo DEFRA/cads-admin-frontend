@@ -1,7 +1,25 @@
 // Converts the raw values returned by the db admin commands into numbers the
 // charts can plot and text the tables can show.
 
-const secondsPerUnit = { day: 86400, hour: 3600, min: 60, sec: 1 }
+const millisecondsPerSecond = 1000
+const secondsPerMinute = 60
+const secondsPerHour = 3600
+const secondsPerDay = 86400
+
+const secondsPerUnit = {
+  day: secondsPerDay,
+  hour: secondsPerHour,
+  min: secondsPerMinute,
+  sec: 1
+}
+
+// Matched against whole whitespace separated tokens, so each pattern is
+// anchored at both ends and cannot backtrack across the input
+const amountPattern = /^-?\d+(?:\.\d+)?$/
+const unitPattern = /^(day|hour|min|sec)/i
+const timePattern = /^([+-]?)(\d+):(\d{2}):(\d{2}(?:\.\d+)?)$/
+
+const bytesPerKilobyte = 1024
 
 const sizeUnits = { bytes: 0, kb: 1, mb: 2, gb: 3, tb: 4, pb: 5 }
 
@@ -31,19 +49,27 @@ export function parseInterval(value) {
   let seconds = 0
   let matched = false
 
-  const unitPattern = /(-?\d+(?:\.\d+)?)\s*(day|hour|min|sec)[a-z]*/gi
-  for (const [, amount, unit] of value.matchAll(unitPattern)) {
-    seconds += Number(amount) * secondsPerUnit[unit.toLowerCase()]
-    matched = true
-  }
+  const tokens = value.trim().split(/\s+/)
+  tokens.forEach((token, index) => {
+    const time = timePattern.exec(token)
+    if (time) {
+      const [, sign, hours, minutes, secs] = time
+      const total =
+        Number(hours) * secondsPerHour +
+        Number(minutes) * secondsPerMinute +
+        Number(secs)
+      seconds += sign === '-' ? -total : total
+      matched = true
+      return
+    }
 
-  const time = /(-)?(\d+):(\d{2}):(\d{2}(?:\.\d+)?)/.exec(value)
-  if (time) {
-    const [, sign, hours, minutes, secs] = time
-    const total = Number(hours) * 3600 + Number(minutes) * 60 + Number(secs)
-    seconds += sign ? -total : total
-    matched = true
-  }
+    // An amount followed by its unit, e.g. "3 days"
+    const unit = unitPattern.exec(tokens[index + 1] ?? '')
+    if (unit && amountPattern.test(token)) {
+      seconds += Number(token) * secondsPerUnit[unit[1].toLowerCase()]
+      matched = true
+    }
+  })
 
   return matched ? seconds : null
 }
@@ -57,15 +83,15 @@ export function formatDuration(seconds) {
     return ''
   }
   if (seconds < 1) {
-    return `${Math.round(seconds * 1000)}ms`
+    return `${Math.round(seconds * millisecondsPerSecond)}ms`
   }
 
   let remaining = Math.floor(seconds)
   const parts = []
   for (const [suffix, size] of [
-    ['d', 86400],
-    ['h', 3600],
-    ['m', 60]
+    ['d', secondsPerDay],
+    ['h', secondsPerHour],
+    ['m', secondsPerMinute]
   ]) {
     if (remaining >= size) {
       parts.push(`${Math.floor(remaining / size)}${suffix}`)
@@ -89,7 +115,9 @@ export function parseSize(value) {
   if (!match) {
     return null
   }
-  return Number(match[1]) * 1024 ** sizeUnits[match[2].toLowerCase()]
+  return (
+    Number(match[1]) * bytesPerKilobyte ** sizeUnits[match[2].toLowerCase()]
+  )
 }
 
 /**

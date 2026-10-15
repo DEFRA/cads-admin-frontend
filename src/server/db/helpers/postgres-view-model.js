@@ -110,6 +110,19 @@ export function buildActionForms(actions, { returnTo, actionError } = {}) {
   })
 }
 
+/**
+ * A form validation error takes precedence over a failed command.
+ *
+ * @param {{ actionId: string } | undefined} actionError
+ * @param {{ statusCode: number } | null | undefined} error
+ */
+export function statusCodeFor(actionError, error) {
+  if (actionError) {
+    return statusCodes.badRequest
+  }
+  return error ? error.statusCode : statusCodes.ok
+}
+
 export function actionErrorList(actionError) {
   return actionError
     ? [{ text: actionError.text, href: `#${actionError.actionId}-pid` }]

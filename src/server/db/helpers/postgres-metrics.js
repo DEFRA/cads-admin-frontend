@@ -26,6 +26,17 @@ export const postgresSections = [
   { id: 'queries', title: 'Query performance monitoring' }
 ]
 
+// Matches the renderers in src/client/javascripts/charts. A summary metric
+// shows a count and its table, with no chart.
+const chartTypes = Object.freeze({
+  bar: 'bar',
+  horizontalBar: 'horizontal-bar',
+  groupedBar: 'grouped-bar',
+  summary: 'summary'
+})
+
+const indexScans = 'Index scans'
+
 const tableName = (row) => `${row.schemaname}.${row.table_name}`
 
 const byDesc = (value) => (a, b) => value(b) - value(a)
@@ -51,7 +62,7 @@ export const postgresMetrics = [
     width: 'one-third',
     title: 'Sessions by state',
     description: 'Number of database sessions in each connection state.',
-    chartType: 'bar',
+    chartType: chartTypes.bar,
     chartLabel: 'Bar chart showing the number of sessions in each state',
     category: (row) => row.state ?? 'unknown',
     series: [{ name: 'Sessions', value: (row) => toNumber(row.sessions) }],
@@ -66,7 +77,7 @@ export const postgresMetrics = [
     width: 'two-thirds',
     title: 'Longest running queries',
     description: 'Queries that are not idle, by how long they have run.',
-    chartType: 'horizontal-bar',
+    chartType: chartTypes.horizontalBar,
     chartLabel:
       'Horizontal bar chart showing the longest running queries by duration in seconds',
     order: byDesc((row) => parseInterval(row.duration) ?? 0),
@@ -96,7 +107,7 @@ export const postgresMetrics = [
     width: 'one-half',
     title: 'Transactions',
     description: 'Committed and rolled back transactions for each database.',
-    chartType: 'grouped-bar',
+    chartType: chartTypes.groupedBar,
     chartLabel:
       'Grouped bar chart showing commits and rollbacks for each database',
     category: (row) => row.datname,
@@ -117,7 +128,7 @@ export const postgresMetrics = [
     width: 'one-half',
     title: 'Rows read and modified',
     description: 'Rows returned, inserted, updated and deleted per database.',
-    chartType: 'grouped-bar',
+    chartType: chartTypes.groupedBar,
     chartLabel:
       'Grouped bar chart showing rows returned, inserted, updated and deleted for each database',
     category: (row) => row.datname,
@@ -142,7 +153,7 @@ export const postgresMetrics = [
     width: 'one-half',
     title: 'Buffer cache hit ratio',
     description: 'Percentage of block reads served from the buffer cache.',
-    chartType: 'bar',
+    chartType: chartTypes.bar,
     chartLabel:
       'Bar chart showing the buffer cache hit ratio percentage for each database',
     maxValue: 100,
@@ -170,7 +181,7 @@ export const postgresMetrics = [
     width: 'one-half',
     title: 'Idle in transaction sessions',
     description: 'Sessions holding an open transaction while idle.',
-    chartType: 'horizontal-bar',
+    chartType: chartTypes.horizontalBar,
     chartLabel:
       'Horizontal bar chart showing idle in transaction sessions by idle time in seconds',
     order: byDesc((row) => parseInterval(row.idle_duration) ?? 0),
@@ -197,7 +208,7 @@ export const postgresMetrics = [
     width: 'one-half',
     title: 'Locks and blocking',
     description: 'Sessions waiting on a lock held by another session.',
-    chartType: 'summary',
+    chartType: chartTypes.summary,
     summaryLabel: 'Blocked sessions',
     order: byDesc((row) => parseInterval(row.blocked_duration) ?? 0),
     pidKey: 'blocking_pid',
@@ -213,7 +224,7 @@ export const postgresMetrics = [
     width: 'one-half',
     title: 'Prepared transactions',
     description: 'Two-phase commit transactions waiting to be committed.',
-    chartType: 'summary',
+    chartType: chartTypes.summary,
     summaryLabel: 'Prepared transactions',
     columns: [
       { key: 'gid', text: 'Transaction ID' },
@@ -229,7 +240,7 @@ export const postgresMetrics = [
     width: 'one-half',
     title: 'Table activity',
     description: 'Sequential and index scans on the busiest tables.',
-    chartType: 'grouped-bar',
+    chartType: chartTypes.groupedBar,
     chartLabel:
       'Grouped bar chart showing sequential and index scans for the busiest tables',
     order: byDesc((row) => toNumber(row.seq_scan) + toNumber(row.idx_scan)),
@@ -237,12 +248,12 @@ export const postgresMetrics = [
     category: tableName,
     series: [
       { name: 'Sequential scans', value: (row) => toNumber(row.seq_scan) },
-      { name: 'Index scans', value: (row) => toNumber(row.idx_scan) }
+      { name: indexScans, value: (row) => toNumber(row.idx_scan) }
     ],
     columns: [
       { key: tableName, text: 'Table' },
       { key: 'seq_scan', text: 'Sequential scans', format: 'number' },
-      { key: 'idx_scan', text: 'Index scans', format: 'number' },
+      { key: 'idx_scan', text: indexScans, format: 'number' },
       { key: 'n_tup_ins', text: 'Inserts', format: 'number' },
       { key: 'n_tup_upd', text: 'Updates', format: 'number' },
       { key: 'n_tup_del', text: 'Deletes', format: 'number' },
@@ -257,12 +268,12 @@ export const postgresMetrics = [
     width: 'one-half',
     title: 'Index usage',
     description: 'The most scanned indexes.',
-    chartType: 'horizontal-bar',
+    chartType: chartTypes.horizontalBar,
     chartLabel: 'Horizontal bar chart showing the number of scans per index',
     order: byDesc((row) => toNumber(row.idx_scan)),
     limit: 15,
     category: (row) => row.index_name,
-    series: [{ name: 'Index scans', value: (row) => toNumber(row.idx_scan) }],
+    series: [{ name: indexScans, value: (row) => toNumber(row.idx_scan) }],
     columns: [
       { key: tableName, text: 'Table' },
       { key: 'index_name', text: 'Index' },
@@ -277,7 +288,7 @@ export const postgresMetrics = [
     width: 'one-half',
     title: 'Largest tables',
     description: 'Tables by total size, including indexes.',
-    chartType: 'horizontal-bar',
+    chartType: chartTypes.horizontalBar,
     chartLabel:
       'Horizontal bar chart showing the largest tables by total size in megabytes',
     order: byDesc((row) => parseSize(row.total_size) ?? 0),
@@ -304,7 +315,7 @@ export const postgresMetrics = [
     width: 'one-half',
     title: 'Database size',
     description: 'Size on disk of each database.',
-    chartType: 'horizontal-bar',
+    chartType: chartTypes.horizontalBar,
     chartLabel:
       'Horizontal bar chart showing the size of each database in megabytes',
     order: byDesc((row) => toNumber(row.size_bytes)),
@@ -327,7 +338,7 @@ export const postgresMetrics = [
     width: 'one-half',
     title: 'Slowest queries',
     description: 'Queries with the most total execution time.',
-    chartType: 'horizontal-bar',
+    chartType: chartTypes.horizontalBar,
     chartLabel:
       'Horizontal bar chart showing the slowest queries by total execution time in milliseconds',
     unavailableMessage: queryStatisticsUnavailable,
@@ -355,7 +366,7 @@ export const postgresMetrics = [
     width: 'one-half',
     title: 'Highest shared block reads',
     description: 'Queries reading the most shared blocks from disk.',
-    chartType: 'horizontal-bar',
+    chartType: chartTypes.horizontalBar,
     chartLabel:
       'Horizontal bar chart showing the queries with the highest shared block reads',
     unavailableMessage: queryStatisticsUnavailable,
@@ -425,7 +436,7 @@ function buildTable(metric, rows) {
 }
 
 function buildChart(metric, rows) {
-  if (metric.chartType === 'summary') {
+  if (metric.chartType === chartTypes.summary) {
     return null
   }
 

@@ -4,6 +4,17 @@ import { chartWidth, createChartFrame } from './chart-frame.js'
 import { formatTick, formatValue, truncate } from './format.js'
 import { axisColour, seriesColour } from './palette.js'
 
+// Sizes are in SVG units
+const defaultWidth = 520
+const height = 260
+const margin = { top: 10, right: 20, bottom: 40, left: 60 }
+// Rotated category labels need more room below the axis
+const rotatedLabelsBottom = 80
+const longLabelLength = 10
+const labelLength = 18
+const barPadding = 0.35
+const valueTicks = 5
+
 /**
  * Vertical bar chart for a single series, e.g. sessions by state.
  *
@@ -12,15 +23,17 @@ import { axisColour, seriesColour } from './palette.js'
  */
 export function renderBarChart(figure, chart) {
   const [series] = chart.series
-  const longLabels = chart.categories.some((category) => category.length > 10)
+  const longLabels = chart.categories.some(
+    (category) => category.length > longLabelLength
+  )
 
   const { svg, plot, innerWidth, innerHeight } = createChartFrame(
     figure,
     chart,
     {
-      width: chartWidth(figure, 520),
-      height: 260,
-      margin: { top: 10, right: 20, bottom: longLabels ? 80 : 40, left: 60 }
+      width: chartWidth(figure, defaultWidth),
+      height,
+      margin: longLabels ? { ...margin, bottom: rotatedLabelsBottom } : margin
     }
   )
 
@@ -28,7 +41,7 @@ export function renderBarChart(figure, chart) {
   // get their own bars
   const keys = chart.categories.map((_, index) => index)
 
-  const x = scaleBand().domain(keys).range([0, innerWidth]).padding(0.35)
+  const x = scaleBand().domain(keys).range([0, innerWidth]).padding(barPadding)
 
   const y = scaleLinear()
     .domain([0, chart.maxValue ?? (max(series.values) || 1)])
@@ -40,7 +53,9 @@ export function renderBarChart(figure, chart) {
     .attr('class', 'app-chart__axis')
     .attr('transform', `translate(0,${innerHeight})`)
     .call(
-      axisBottom(x).tickFormat((index) => truncate(chart.categories[index], 18))
+      axisBottom(x).tickFormat((index) =>
+        truncate(chart.categories[index], labelLength)
+      )
     )
 
   if (longLabels) {
@@ -55,7 +70,7 @@ export function renderBarChart(figure, chart) {
   plot
     .append('g')
     .attr('class', 'app-chart__axis')
-    .call(axisLeft(y).ticks(5).tickFormat(formatTick))
+    .call(axisLeft(y).ticks(valueTicks).tickFormat(formatTick))
 
   plot
     .append('g')
