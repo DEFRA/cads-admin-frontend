@@ -66,4 +66,20 @@ describe('#sqsQueueMetricsController', () => {
       expect(response.statusCode).toBe(statusCodes.ok)
     })
   })
+
+  describe('GET SQS Metrics page when getQueueMetrics fails', () => {
+    test('Should return a bad request response', async () => {
+      getQueueMetrics.mockRejectedValueOnce(new Error('Failed to fetch'))
+
+      const response = await server.inject({
+        method: 'GET',
+        url: '/dashboard/monitoring/sqs/test-client/test-queue'
+      })
+
+      expect(response.statusCode).toBe(statusCodes.badRequest)
+      expect(response.result).toEqual(
+        expect.stringContaining('The request you made is invalid')
+      )
+    })
+  })
 })
