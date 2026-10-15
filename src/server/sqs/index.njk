@@ -31,8 +31,8 @@
           { text: queue.queueName, classes: "app-break-word" },
           { text: queue.dlqName, classes: "app-break-word" },
           {
-            html: '<a href="' + queue.exploreUrl + '" class="govuk-link">Explore<span class="govuk-visually-hidden"> '
-              + (queue.queueName | escape) + '</span></a>'
+            html: '<a href="/dashboard/monitoring/sqs/' + queueService.name + '/' + queue.name + '" class="govuk-link">Explore<span class="govuk-visually-hidden"> '
+              + (queue.name | escape) + '</span></a>'
           }
         ] %}
         {% set _ = rows.push(row) %}
@@ -43,11 +43,11 @@
           firstCellIsHeader: true,
           head: head,
           rows: rows,
-          attributes: { "data-testid": "bucket-table" }
+          attributes: { "data-testid": "queue-table" }
         }) }}
     {% else %}
-      <h2 class="govuk-heading-m" data-testid="no-buckets-heading">{{queueService.name}}</h2>
-      <p class="govuk-body" data-testid="no-buckets">Administration API is not available for this service</p>
+      <h2 class="govuk-heading-m" data-testid="no-queues-heading">{{queueService.name}}</h2>
+      <p class="govuk-body" data-testid="no-queues">Administration API is not available for this service</p>
     {% endif %}
   {% endfor %}
 
