@@ -1,13 +1,23 @@
 import { getQueueMetrics } from '../../common/clients/requests/sqs-admin.js'
+import Boom from '@hapi/boom'
 
 export const sqsQueueMetricsController = {
   async handler(request, h) {
     const { client, queueName } = request.params
-    const [queueMetricsData, dlqMetricsData] = await getQueueMetrics(
-      request,
-      client,
-      queueName
-    )
+
+    let queueMetricsData, dlqMetricsData
+    try {
+      ;[queueMetricsData, dlqMetricsData] = await getQueueMetrics(
+        request,
+        client,
+        queueName
+      )
+    } catch (error) {
+      return Boom.badRequest(
+        'Failed to fetch SQS queue metrics. Please try again later.'
+      )
+    }
+
     return h.view('sqs/queue-metrics/index', {
       pageTitle: 'SQS Metrics',
       heading: 'Message queue and DLQ monitoring',
