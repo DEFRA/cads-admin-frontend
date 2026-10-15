@@ -69,19 +69,17 @@ describe('#postgresActionController', () => {
     return { response, $: cheerio.load(response.result ?? '') }
   }
 
-  test.each([
-    ['role', credentials({ scopes: ['admin.db.execute'] })],
-    ['scope', credentials({ roles: ['cads-admin-superuser'] })]
-  ])(
-    'Should redirect to the Unauthorised page without the %s',
-    async (_, creds) => {
-      const { response } = await postAction('cancel-query', { pid: '1' }, creds)
+  test('Should redirect to the Unauthorised page without the scope', async () => {
+    const { response } = await postAction(
+      'cancel-query',
+      { pid: '1' },
+      credentials()
+    )
 
-      expect(response.statusCode).toBe(302)
-      expect(response.headers.location).toBe('/unauthorised')
-      expect(fetch).not.toHaveBeenCalled()
-    }
-  )
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/unauthorised')
+    expect(fetch).not.toHaveBeenCalled()
+  })
 
   test.each([
     ['cancel-query', 'cancel_query'],

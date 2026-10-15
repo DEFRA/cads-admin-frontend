@@ -6,10 +6,7 @@ export function credentials({ roles = [], scopes = [] } = {}) {
   return { user: { roles }, tokenSet: { access_token: accessToken } }
 }
 
-// Has the role and scope needed for every DB Monitoring page
-export const dbMonitoringUser = credentials({
-  roles: ['cads-admin-superuser'],
-  scopes: ['admin.db.execute']
-})
+// Has the scope needed for every DB Monitoring page
+export const dbMonitoringUser = credentials({ scopes: ['admin.db.execute'] })
 
 export const ctsImportUser = dbMonitoringUser

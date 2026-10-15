@@ -10,8 +10,7 @@ import {
   postgresPerformancePath
 } from './paths.js'
 
-// Every DB Monitoring page needs the cads-admin-superuser role and the
-// admin.db.execute scope
+// Every DB Monitoring page needs the admin.db.execute scope
 const routeOptions = {
   auth: {
     strategy: 'session',

@@ -18,10 +18,7 @@ const apiScopes = [
 ]
 
 export const oidcUsers = {
-  // Has the cads-admin-superuser role
-  admin: { username: 'cads-admin-user', password: 'password' },
-  // Signed in, but without the cads-admin-superuser role
-  noRole: { username: 'mip-viewer-user', password: 'password' }
+  admin: { username: 'cads-admin-user', password: 'password' }
 }
 
 const users = [
@@ -29,19 +26,7 @@ const users = [
     SubjectId: 'bb054d87-3cf7-4809-beaf-42b0cdc2e419',
     Username: oidcUsers.admin.username,
     Password: oidcUsers.admin.password,
-    Claims: [
-      { Type: 'name', Value: 'Test CADS Admin' },
-      { Type: 'role', Value: 'cads-admin-superuser' }
-    ]
-  },
-  {
-    SubjectId: '787553ae-4c55-4b42-aafc-633274691cc1',
-    Username: oidcUsers.noRole.username,
-    Password: oidcUsers.noRole.password,
-    Claims: [
-      { Type: 'name', Value: 'Test MIP Viewer' },
-      { Type: 'role', Value: 'mip-viewer' }
-    ]
+    Claims: [{ Type: 'name', Value: 'Test CADS Admin' }]
   }
 ]
 
@@ -85,14 +70,13 @@ export async function startOidcMock() {
       API_RESOURCES_INLINE: JSON.stringify([
         {
           Name: 'api://local-cads-cds',
-          Scopes: apiScopes,
-          UserClaims: ['role']
+          Scopes: apiScopes
         }
       ]),
       OVERRIDE_STANDARD_IDENTITY_RESOURCES: 'true',
       IDENTITY_RESOURCES_INLINE: JSON.stringify([
         { Name: 'openid', ClaimTypes: ['sub'] },
-        { Name: 'profile', ClaimTypes: ['name', 'role'] },
+        { Name: 'profile', ClaimTypes: ['name'] },
         { Name: 'email', ClaimTypes: ['email'] }
       ])
     })

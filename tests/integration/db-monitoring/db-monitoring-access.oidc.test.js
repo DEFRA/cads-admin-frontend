@@ -115,7 +115,7 @@ describe('DB Monitoring access with the OIDC mock', () => {
     expect(response.headers.location).toBe('/login')
   })
 
-  describe('with the cads-admin-superuser role and admin.db.execute scope', () => {
+  describe('with the admin.db.execute scope', () => {
     let cookie
 
     beforeAll(async () => {
@@ -152,18 +152,13 @@ describe('DB Monitoring access with the OIDC mock', () => {
     })
   })
 
-  describe.each([
-    ['without the cads-admin-superuser role', oidcUsers.noRole, []],
-    [
-      'without the admin.db.execute scope',
-      oidcUsers.admin,
-      ['admin.db.execute']
-    ]
-  ])('%s', (_, user, removeScopes) => {
+  describe('without the admin.db.execute scope', () => {
     let cookie
 
     beforeAll(async () => {
-      cookie = await signIn(server, user, { removeScopes })
+      cookie = await signIn(server, oidcUsers.admin, {
+        removeScopes: ['admin.db.execute']
+      })
     })
 
     test('Should hide the DB Monitoring card', async () => {

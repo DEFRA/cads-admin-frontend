@@ -40,11 +40,6 @@ vi.mock('../../../src/auth/config/auth-config.js', () => ({
   getAuthConfig: vi.fn(() => ({ exchangeScope: 'openid api://cds/scope' }))
 }))
 
-// Mock roles + permissions
-vi.mock('../../../src/auth/constants/roles.js', () => ({
-  roleTypes: { miAdmin: 'MI_ADMIN' }
-}))
-
 // Import module under test AFTER mocks
 let sessionMiddleware
 beforeEach(async () => {

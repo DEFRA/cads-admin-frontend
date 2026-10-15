@@ -76,24 +76,12 @@ describe('#postgresPerformanceController', () => {
 
   describe('access', () => {
     test.each([
-      ['/dashboard/monitoring/db', 'the cads-admin-superuser role'],
-      [
-        '/dashboard/monitoring/db/postgres-performance',
-        'the cads-admin-superuser role'
-      ],
-      ['/dashboard/monitoring/db', 'the admin.db.execute scope'],
-      [
-        '/dashboard/monitoring/db/postgres-performance',
-        'the admin.db.execute scope'
-      ]
+      '/dashboard/monitoring/db',
+      '/dashboard/monitoring/db/postgres-performance'
     ])(
-      'Should redirect %s to the Unauthorised page without %s',
-      async (url, missing) => {
-        const creds = missing.includes('role')
-          ? credentials({ scopes: ['admin.db.execute'] })
-          : credentials({ roles: ['cads-admin-superuser'] })
-
-        const { response } = await getPage(url, creds)
+      'Should redirect %s to the Unauthorised page without the admin.db.execute scope',
+      async (url) => {
+        const { response } = await getPage(url, credentials())
 
         expect(response.statusCode).toBe(302)
         expect(response.headers.location).toBe('/unauthorised')

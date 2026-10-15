@@ -55,15 +55,14 @@ describe('#monitoringController', () => {
       return cheerio.load(response.result)('a[href="monitoring/db"]')
     }
 
-    test('Should show the card to a superuser with the admin.db.execute scope', async () => {
+    test('Should show the card to a user with the admin.db.execute scope', async () => {
       expect(await dbMonitoringCards(dbMonitoringUser)).toHaveLength(1)
     })
 
-    test.each([
-      ['role', credentials({ scopes: ['admin.db.execute'] })],
-      ['scope', credentials({ roles: ['cads-admin-superuser'] })]
-    ])('Should hide the card without the required %s', async (_, creds) => {
-      expect(await dbMonitoringCards(creds)).toHaveLength(0)
+    test('Should hide the card without the admin.db.execute scope', async () => {
+      expect(
+        await dbMonitoringCards(credentials({ scopes: ['admin.s3.manager'] }))
+      ).toHaveLength(0)
     })
   })
 })

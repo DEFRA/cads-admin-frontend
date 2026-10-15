@@ -52,10 +52,10 @@ describe('#postgresDetailController', () => {
     return { response, $: cheerio.load(response.result ?? '') }
   }
 
-  test('Should redirect to the Unauthorised page without the role', async () => {
+  test('Should redirect to the Unauthorised page without the scope', async () => {
     const { response } = await getPage(
       '/dashboard/monitoring/db/postgres-performance/active_queries',
-      credentials({ scopes: ['admin.db.execute'] })
+      credentials()
     )
 
     expect(response.statusCode).toBe(302)
