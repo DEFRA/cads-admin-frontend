@@ -1,9 +1,63 @@
 {% extends 'layouts/page.njk' %}
 {% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 
 {% block content %}
   {{ appHeading({
     text: heading,
     caption: "Queue messages"
   }) }}
+
+  {% if viewModel.replaySummary %}
+    {{ govukNotificationBanner({
+      type: "success" if viewModel.replaySummary.failed == 0 else undefined,
+      titleText: "Replay all result" if viewModel.replaySummary.failed > 0 else undefined,
+      html: "Messages moved back to the queue: <strong>" + viewModel.replaySummary.moved + "</strong>. Messages that failed to replay: <strong>" + viewModel.replaySummary.failed + "</strong>." + (" Check the service logs for failure details." if viewModel.replaySummary.checkLogsForFailures else ""),
+      attributes: { "data-testid": "replay-summary" }
+    }) }}
+  {% endif %}
+    <form method="get" novalidate>
+      {{ govukSelect({
+        id: "maxMessages",
+        name: "maxMessages",
+        label: {
+          text: "Maximum number of messages to display"
+        },
+        items: viewModel.maxMessagesItems
+      }) }}
+      <div class="govuk-button-group">
+         {{ govukButton({ text: "Apply filter", preventDoubleClick: true }) }}
+      </div>
+    </form>
+
+  {% if viewModel.rows | length %}
+    {{ govukTable({
+      head: viewModel.head,
+      rows: viewModel.rows,
+      classes: "govuk-table--small-text-until-tablet",
+      attributes: { "data-testid": "queue-messages-table" }
+    }) }}
+
+    {% if viewModel.showReplayAllButton %}
+      <form method="post" action="{{ viewModel.replayUrl }}" novalidate data-testid="replay-all-form">
+        <input type="hidden" name="maxMessages" value="{{ viewModel.maxMessages }}" />
+        <div class="govuk-button-group">
+          {{ govukButton({
+            text: "Replay all messages",
+            preventDoubleClick: true,
+            classes: "govuk-button--warning",
+            attributes: { "data-testid": "replay-all-button" }
+          }) }}
+        </div>
+      </form>
+    {% endif %}
+  {% else %}
+    {{ govukInsetText({
+      text: "There are no messages on this queue.",
+      attributes: { "data-testid": "no-messages" }
+    }) }}
+  {% endif %}
 {% endblock %}

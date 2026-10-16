@@ -6,7 +6,9 @@ import Boom from '@hapi/boom'
 // Read-only queue management endpoints in cads-data-service and cads-bridge
 const basePath = '/api/v1/systemadmin/sqs'
 const cadsBridgeClientName = 'CADS Bridge'
+const cadsBridgeClientSlug = 'cads-bridge'
 const cadsCdsClientName = 'CADS Data Service'
+const cadsCdsClientSlug = 'cads-cds'
 
 function cadsCdsClient(request) {
   return createApiClient(request, getConfig().get('cadsCdsBackendUrl'))
@@ -35,6 +37,10 @@ async function getQueueDetails(client, clientName, requestPath) {
     const result = await client.get(requestPath)
     return {
       name: clientName,
+      slug:
+        clientName === cadsCdsClientName
+          ? cadsCdsClientSlug
+          : cadsBridgeClientSlug,
       adminEnabled: true,
       queues: result.queues.map((queue) => ({
         name: queue.name,
@@ -46,6 +52,10 @@ async function getQueueDetails(client, clientName, requestPath) {
     if (error.output.statusCode === statusCodes.notFound) {
       return {
         name: clientName,
+        slug:
+          clientName === cadsCdsClientName
+            ? cadsCdsClientSlug
+            : cadsBridgeClientSlug,
         adminEnabled: false,
         queues: []
       }
@@ -56,7 +66,7 @@ async function getQueueDetails(client, clientName, requestPath) {
 
 export async function getQueueMetrics(request, clientName, queueName) {
   const client =
-    clientName === cadsCdsClientName
+    clientName === cadsCdsClientSlug
       ? cadsCdsClient(request)
       : cadsBridgeClient(request)
   const queuePath = `${basePath}/queues/${queueName}/metrics`
@@ -65,6 +75,44 @@ export async function getQueueMetrics(request, clientName, queueName) {
     const queueMetrics = await client.get(queuePath)
     const dlqMetrics = await client.get(dqlPath)
     return [queueMetrics, dlqMetrics]
+  } catch (error) {
+    throw Boom.badRequest(error.message)
+  }
+}
+
+export async function getQueueMessages(
+  request,
+  clientName,
+  queueName,
+  queueType,
+  maxMessages
+) {
+  const client =
+    clientName === cadsCdsClientSlug
+      ? cadsCdsClient(request)
+      : cadsBridgeClient(request)
+  const queuePath =
+    queueType === 'dlq'
+      ? `${basePath}/queues/${queueName}/dlq/messages?maxMessages=${maxMessages}`
+      : `${basePath}/queues/${queueName}/messages?maxMessages=${maxMessages}`
+  try {
+    return await client.get(queuePath)
+  } catch (error) {
+    throw Boom.badRequest(error.message)
+  }
+}
+
+export async function replayDLQMessages(request, clientName, queueName) {
+  const client =
+    clientName === cadsCdsClientSlug
+      ? cadsCdsClient(request)
+      : cadsBridgeClient(request)
+  const queuePath = `${basePath}/queues/${queueName}/dlq/replay`
+  const body = {
+    BatchSize: 10
+  }
+  try {
+    return await client.post(queuePath, body)
   } catch (error) {
     throw Boom.badRequest(error.message)
   }
