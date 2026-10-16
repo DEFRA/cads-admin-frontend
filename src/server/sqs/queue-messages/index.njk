@@ -19,6 +19,8 @@
       attributes: { "data-testid": "replay-summary" }
     }) }}
   {% endif %}
+
+  {% if viewModel.rows | length %}
     <form method="get" novalidate>
       {{ govukSelect({
         id: "maxMessages",
@@ -33,7 +35,6 @@
       </div>
     </form>
 
-  {% if viewModel.rows | length %}
     {{ govukTable({
       head: viewModel.head,
       rows: viewModel.rows,
