@@ -31,7 +31,7 @@
           { text: queue.queueName, classes: "app-break-word" },
           { text: queue.dlqName, classes: "app-break-word" },
           {
-            html: '<a href="/dashboard/monitoring/sqs/' + queueService.name + '/' + queue.name + '" class="govuk-link">Explore<span class="govuk-visually-hidden"> '
+            html: '<a href="/dashboard/monitoring/sqs/' + queueService.slug + '/' + queue.name + '" class="govuk-link">Explore<span class="govuk-visually-hidden"> '
               + (queue.name | escape) + '</span></a>'
           }
         ] %}

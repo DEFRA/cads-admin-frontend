@@ -26,6 +26,9 @@
     {
       text: "Oldest message age in seconds",
       format: "numeric"
+    },
+    {
+      html: '<span class="govuk-visually-hidden">Actions</span>'
     }
   ] %}
   {% set rows = [
@@ -34,14 +37,22 @@
       { text: viewModel.queueMetrics.metrics.approximateNumberOfMessages, format: "numeric" },
       { text: viewModel.queueMetrics.metrics.approximateNumberOfMessagesNotVisible, format: "numeric" },
       { text: viewModel.queueMetrics.metrics.approximateNumberOfMessagesDelayed, format: "numeric" },
-      { text: viewModel.queueMetrics.metrics.oldestMessageAgeSeconds, format: "numeric" }
+      { text: viewModel.queueMetrics.metrics.oldestMessageAgeSeconds, format: "numeric" },
+      {
+        html: '<a href="/dashboard/monitoring/sqs/' + viewModel.client + '/' + viewModel.queueMetrics.queue + '/queue/messages" class="govuk-link">View messages<span class="govuk-visually-hidden"> ' +
+          (viewModel.queueMetrics.queue | escape) + '</span></a>'
+      }
     ],
     [
       { text: "DLQ" },
       { text: viewModel.dlqMetrics.metrics.approximateNumberOfMessages, format: "numeric" },
       { text: viewModel.dlqMetrics.metrics.approximateNumberOfMessagesNotVisible, format: "numeric" },
       { text: viewModel.dlqMetrics.metrics.approximateNumberOfMessagesDelayed, format: "numeric" },
-      { text: viewModel.dlqMetrics.metrics.oldestMessageAgeSeconds, format: "numeric" }
+      { text: viewModel.dlqMetrics.metrics.oldestMessageAgeSeconds, format: "numeric" },
+      {
+        html: '<a href="/dashboard/monitoring/sqs/' + viewModel.client + '/' + viewModel.dlqMetrics.queue + '/dlq/messages" class="govuk-link">View messages<span class="govuk-visually-hidden"> ' +
+          (viewModel.dlqMetrics.queue | escape) + '</span></a>'
+      }
     ]
   ] %}
 
@@ -53,7 +64,4 @@
       rows: rows,
       attributes: { "data-testid": "queue-table" }
     }) }}
-
-  <pre>{{ viewModel.queueMetrics | dump }}</pre>
-  <pre>{{ viewModel.dlqMetrics | dump }}</pre>
 {% endblock %}
