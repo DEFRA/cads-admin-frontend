@@ -40,6 +40,10 @@ export default [
     files: ['src/client/**/*.js'],
     languageOptions: {
       globals: { ...globals.browser }
+    },
+    rules: {
+      // Browser code must not log monitoring data to the console
+      'no-console': 'error'
     }
   },
   {

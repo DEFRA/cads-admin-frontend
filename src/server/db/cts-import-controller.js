@@ -10,15 +10,17 @@ import {
   formatDateTime
 } from './helpers/cts-import-commands.js'
 import { describeCtsImportError } from './helpers/errors.js'
+import { buildDbMonitoringSubNavigation } from './helpers/sub-navigation.js'
+import { ctsImportPath, dbMonitoringPath, monitoringPath } from './paths.js'
 
-export const ctsImportPath = '/dashboard/monitoring/db/cts-import'
+export { ctsImportPath }
 
 const pageTitle = 'CTS Parallel Import Monitoring'
 
 const breadcrumbs = [
   { text: 'Dashboard', href: '/dashboard' },
-  { text: 'Monitoring', href: '/dashboard/monitoring' },
-  { text: 'DB', href: '/dashboard/monitoring/db' },
+  { text: 'Monitoring', href: monitoringPath },
+  { text: 'DB', href: dbMonitoringPath },
   { text: pageTitle }
 ]
 
@@ -111,6 +113,7 @@ export const ctsImportController = {
         heading: pageTitle,
         breadcrumbs,
         viewModel: {
+          subNavigation: buildDbMonitoringSubNavigation(request),
           formAction: ctsImportPath,
           runsLoaded: runsOutcome.status === 'fulfilled',
           runItems: runItems(runs, selectedRunId),

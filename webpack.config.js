@@ -25,6 +25,10 @@ export default (_env, argv) => {
           './javascripts/application.js',
           './stylesheets/application.scss'
         ]
+      },
+      // D3 charts, loaded only by the Postgres Performance Monitoring page
+      'db-monitoring': {
+        import: ['./javascripts/db-monitoring.js']
       }
     },
     experiments: {

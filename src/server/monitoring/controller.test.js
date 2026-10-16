@@ -1,5 +1,11 @@
+import * as cheerio from 'cheerio'
+
 import { createServer } from '../server.js'
 import { statusCodes } from '../common/constants/status-codes.js'
+import {
+  credentials,
+  dbMonitoringUser
+} from '../../../tests/helpers/credentials.js'
 
 vi.mock('../../auth/auth-required.js', () => ({
   authRequired: vi.fn((_req, h) => h.continue)
@@ -36,6 +42,27 @@ describe('#monitoringController', () => {
         expect.stringContaining('Monitoring Dashboard |')
       )
       expect(response.statusCode).toBe(statusCodes.ok)
+    })
+  })
+
+  describe('DB Monitoring card', () => {
+    async function dbMonitoringCards(creds) {
+      const response = await server.inject({
+        method: 'GET',
+        url: '/dashboard/monitoring',
+        auth: { strategy: 'session', credentials: creds }
+      })
+      return cheerio.load(response.result)('a[href="monitoring/db"]')
+    }
+
+    test('Should show the card to a user with the admin.db.execute scope', async () => {
+      expect(await dbMonitoringCards(dbMonitoringUser)).toHaveLength(1)
+    })
+
+    test('Should hide the card without the admin.db.execute scope', async () => {
+      expect(
+        await dbMonitoringCards(credentials({ scopes: ['admin.s3.manager'] }))
+      ).toHaveLength(0)
     })
   })
 })

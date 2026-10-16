@@ -1,6 +1,11 @@
 import Boom from '@hapi/boom'
 
-import { ctsImportErrorMessages, describeCtsImportError } from './errors.js'
+import {
+  ctsImportErrorMessages,
+  describeCtsImportError,
+  describeDbAdminError,
+  postgresErrorMessages
+} from './errors.js'
 
 describe('#describeCtsImportError', () => {
   test.each([Boom.unauthorized(), Boom.forbidden()])(
@@ -29,4 +34,31 @@ describe('#describeCtsImportError', () => {
       })
     }
   )
+})
+
+describe('#describeDbAdminError', () => {
+  test.each([
+    [Boom.forbidden(), 403, postgresErrorMessages.forbidden],
+    [Boom.badRequest(), 400, postgresErrorMessages.badRequest],
+    [Boom.gatewayTimeout(), 502, postgresErrorMessages.unavailable]
+  ])('Should map %s with the given messages', (error, statusCode, message) => {
+    expect(describeDbAdminError(error, postgresErrorMessages)).toEqual({
+      statusCode,
+      message
+    })
+  })
+
+  test('Should never pass the backend error detail through', () => {
+    const error = Boom.boomify(new Error('Backend error: 500'), {
+      statusCode: 500
+    })
+    error.output.payload = {
+      title: 'An error occurred',
+      detail: 'relation "cads.secret_table" does not exist'
+    }
+
+    expect(
+      JSON.stringify(describeDbAdminError(error, postgresErrorMessages))
+    ).not.toContain('secret_table')
+  })
 })
