@@ -6,24 +6,25 @@ import Boom from '@hapi/boom'
 import { format } from 'date-fns'
 
 const payloadPreviewMaxLength = 200
+const NOT_AVAILABLE = 'Not available'
 
 function formatSentTimestamp(message) {
   const rawTimestamp =
     message.sentTimestamp ?? message.attributes?.SentTimestamp
   if (!rawTimestamp) {
-    return 'Not available'
+    return NOT_AVAILABLE
   }
 
   const date = new Date(Number(rawTimestamp))
   if (Number.isNaN(date.getTime())) {
-    return 'Not available'
+    return NOT_AVAILABLE
   }
 
   return format(date, 'd MMM yyyy, HH:mm:ss')
 }
 
 function getApproximateReceiveCount(message) {
-  return message.attributes?.ApproximateReceiveCount ?? 'Not available'
+  return message.attributes?.ApproximateReceiveCount ?? NOT_AVAILABLE
 }
 
 function getPayloadPreview(body) {
@@ -36,7 +37,7 @@ function getPayloadPreview(body) {
     : body
 }
 
-function buildTableHead(queueType) {
+function buildTableHead() {
   const head = [
     { text: 'Message ID' },
     { text: 'Sent timestamp' },
@@ -84,7 +85,7 @@ function buildMaxMessagesItems(maxMessages) {
   return items
 }
 
-function buildTableRows(messages, queueType, client, queueName) {
+function buildTableRows(messages) {
   return messages.map((message) => {
     const row = [
       { text: message.messageId },
@@ -137,8 +138,8 @@ export const sqsQueueMessagesController = {
       viewModel: {
         messages,
         queueType,
-        head: buildTableHead(queueType),
-        rows: buildTableRows(messages, queueType, client, queueName),
+        head: buildTableHead(),
+        rows: buildTableRows(messages),
         maxMessagesItems: buildMaxMessagesItems(maxMessages),
         showReplayAllButton: queueType === 'dlq' && messages.length > 0,
         replayUrl: `/dashboard/monitoring/sqs/${client}/${queueName}/dlq/messages/replay`,
