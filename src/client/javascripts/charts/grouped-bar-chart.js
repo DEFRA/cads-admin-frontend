@@ -54,13 +54,28 @@ export function renderGroupedBarChart(figure, chart) {
     .nice()
     .range([innerHeight, 0])
 
+  appendCategoryAxis(plot, x0, chart.categories, innerHeight, longLabels)
+
+  plot
+    .append('g')
+    .attr('class', 'app-chart__axis')
+    .call(axisLeft(y).ticks(valueTicks).tickFormat(formatTick))
+
+  appendBars(plot, chart, { x0, x1, y }, innerHeight)
+
+  svg.selectAll('.domain, .tick line').attr('stroke', axisColour)
+
+  appendLegend(figure, chart.series, seriesColour)
+}
+
+function appendCategoryAxis(plot, x0, categories, innerHeight, longLabels) {
   const xAxis = plot
     .append('g')
     .attr('class', 'app-chart__axis')
     .attr('transform', `translate(0,${innerHeight})`)
     .call(
       axisBottom(x0).tickFormat((index) =>
-        truncate(chart.categories[index], labelLength)
+        truncate(categories[index], labelLength)
       )
     )
 
@@ -72,12 +87,9 @@ export function renderGroupedBarChart(figure, chart) {
       .attr('dx', '-0.5em')
       .attr('dy', '0.5em')
   }
+}
 
-  plot
-    .append('g')
-    .attr('class', 'app-chart__axis')
-    .call(axisLeft(y).ticks(valueTicks).tickFormat(formatTick))
-
+function appendBars(plot, chart, { x0, x1, y }, innerHeight) {
   plot
     .append('g')
     .selectAll('g')
@@ -105,8 +117,4 @@ export function renderGroupedBarChart(figure, chart) {
       (bar) =>
         `${bar.category}, ${bar.name.toLowerCase()}: ${formatValue(bar.value)}`
     )
-
-  svg.selectAll('.domain, .tick line').attr('stroke', axisColour)
-
-  appendLegend(figure, chart.series, seriesColour)
 }
