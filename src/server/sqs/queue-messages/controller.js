@@ -89,7 +89,7 @@ function buildReplayMessageActionHtml(
 
   return `<form method="post" action="${replayUrl}" novalidate class="govuk-!-margin-bottom-0" data-testid="replay-message-form-${safeMessageId}">
   <input type="hidden" name="maxMessages" value="${escapeHtml(maxMessages)}">
-  <button type="submit" class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button" data-prevent-double-click="true" data-testid="replay-message-button-${safeMessageId}">Replay</button>
+  <button type="submit" class="govuk-button govuk-!-margin-bottom-0" data-module="govuk-button" data-prevent-double-click="true" data-testid="replay-message-button-${safeMessageId}">Replay</button>
 </form>`
 }
 
