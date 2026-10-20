@@ -70,7 +70,6 @@ function getMaxMessages(request) {
   return request.query.maxMessages || request.payload?.maxMessages || 10
 }
 
-
 function buildReplayMessageActionHtml(
   client,
   queueName,
