@@ -1,6 +1,7 @@
 import {
   getQueueMessages,
-  replayDLQMessages
+  replayDLQMessages,
+  replayDLQMessage
 } from '../../common/clients/requests/sqs-admin.js'
 import Boom from '@hapi/boom'
 import { format } from 'date-fns'
@@ -37,13 +38,17 @@ function getPayloadPreview(body) {
     : body
 }
 
-function buildTableHead() {
+function buildTableHead(queueType) {
   const head = [
     { text: 'Message ID' },
     { text: 'Sent timestamp' },
     { text: 'Approximate receive count', format: 'numeric' },
     { text: 'Payload preview' }
   ]
+
+  if (queueType === 'dlq') {
+    head.push({ text: 'Actions' })
+  }
 
   return head
 }
@@ -58,6 +63,34 @@ function buildMessagesUrl(client, queueName, queueType, params = {}) {
   }
   const queryString = query.toString()
   return queryString ? `${basePath}?${queryString}` : basePath
+}
+
+function getMaxMessages(request) {
+  return request.query.maxMessages || request.payload?.maxMessages || 10
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function buildReplayMessageActionHtml(
+  client,
+  queueName,
+  maxMessages,
+  messageId
+) {
+  const replayUrl = `/dashboard/monitoring/sqs/${client}/${queueName}/dlq/messages/replay/${encodeURIComponent(messageId)}`
+  const safeMessageId = escapeHtml(messageId)
+
+  return `<form method="post" action="${replayUrl}" novalidate class="govuk-!-margin-bottom-0" data-testid="replay-message-form-${safeMessageId}">
+  <input type="hidden" name="maxMessages" value="${escapeHtml(maxMessages)}">
+  <button type="submit" class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" data-module="govuk-button" data-prevent-double-click="true" data-testid="replay-message-button-${safeMessageId}">Replay</button>
+</form>`
 }
 
 function buildReplaySummary(query) {
@@ -85,7 +118,7 @@ function buildMaxMessagesItems(maxMessages) {
   return items
 }
 
-function buildTableRows(messages) {
+function buildTableRows(messages, queueType, client, queueName, maxMessages) {
   return messages.map((message) => {
     const row = [
       { text: message.messageId },
@@ -94,6 +127,17 @@ function buildTableRows(messages) {
       { text: getPayloadPreview(message.body) }
     ]
 
+    if (queueType === 'dlq') {
+      row.push({
+        html: buildReplayMessageActionHtml(
+          client,
+          queueName,
+          maxMessages,
+          message.messageId
+        )
+      })
+    }
+
     return row
   })
 }
@@ -101,7 +145,7 @@ function buildTableRows(messages) {
 export const sqsQueueMessagesController = {
   async handler(request, h) {
     const { client, queueName, queueType } = request.params
-    const maxMessages = request.query.maxMessages || 10
+    const maxMessages = getMaxMessages(request)
     const messages = []
     try {
       const result = await getQueueMessages(
@@ -138,8 +182,14 @@ export const sqsQueueMessagesController = {
       viewModel: {
         messages,
         queueType,
-        head: buildTableHead(),
-        rows: buildTableRows(messages),
+        head: buildTableHead(queueType),
+        rows: buildTableRows(
+          messages,
+          queueType,
+          client,
+          queueName,
+          maxMessages
+        ),
         maxMessagesItems: buildMaxMessagesItems(maxMessages),
         showReplayAllButton: queueType === 'dlq' && messages.length > 0,
         replayUrl: `/dashboard/monitoring/sqs/${client}/${queueName}/dlq/messages/replay`,
@@ -150,34 +200,50 @@ export const sqsQueueMessagesController = {
   }
 }
 
+async function handleReplayRequest(request, h, replayAction) {
+  const { client, queueName } = request.params
+  const maxMessages = getMaxMessages(request)
+  let moved = 0
+  let failed = 0
+
+  try {
+    const result = await replayAction()
+    moved = result?.moved ?? 0
+    failed = result?.failed ?? 0
+    if (failed > 0 && result?.errors?.length) {
+      request.logger?.error(
+        { queue: result.queue, errors: result.errors },
+        'SQS DLQ replay reported failures'
+      )
+    }
+  } catch (error) {
+    return Boom.badRequest(error.message)
+  }
+
+  return h.redirect(
+    buildMessagesUrl(client, queueName, 'dlq', {
+      maxMessages,
+      replayed: 1,
+      moved,
+      failed
+    })
+  )
+}
+
 export const sqsReplayDLQMessagesController = {
   async handler(request, h) {
     const { client, queueName } = request.params
-    const maxMessages = request.query.maxMessages || 10
-    let moved = 0
-    let failed = 0
+    return handleReplayRequest(request, h, () =>
+      replayDLQMessages(request, client, queueName)
+    )
+  }
+}
 
-    try {
-      const result = await replayDLQMessages(request, client, queueName)
-      moved = result?.moved ?? 0
-      failed = result?.failed ?? 0
-      if (failed > 0 && result?.errors?.length) {
-        request.logger?.error(
-          { queue: result.queue, errors: result.errors },
-          'SQS DLQ replay reported failures'
-        )
-      }
-    } catch (error) {
-      return Boom.badRequest(error.message)
-    }
-
-    return h.redirect(
-      buildMessagesUrl(client, queueName, 'dlq', {
-        maxMessages,
-        replayed: 1,
-        moved,
-        failed
-      })
+export const sqsReplayDLQMessageController = {
+  async handler(request, h) {
+    const { client, queueName, messageId } = request.params
+    return handleReplayRequest(request, h, () =>
+      replayDLQMessage(request, client, queueName, messageId)
     )
   }
 }

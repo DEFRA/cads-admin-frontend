@@ -18,6 +18,12 @@ function cadsBridgeClient(request) {
   return createApiClient(request, getConfig().get('cadsBridgeBackendUrl'))
 }
 
+function resolveClient(request, clientName) {
+  return clientName === cadsCdsClientSlug
+    ? cadsCdsClient(request)
+    : cadsBridgeClient(request)
+}
+
 export async function listQueues(request) {
   const cadsCdsQueues = await getQueueDetails(
     cadsCdsClient(request),
@@ -65,10 +71,7 @@ async function getQueueDetails(client, clientName, requestPath) {
 }
 
 export async function getQueueMetrics(request, clientName, queueName) {
-  const client =
-    clientName === cadsCdsClientSlug
-      ? cadsCdsClient(request)
-      : cadsBridgeClient(request)
+  const client = resolveClient(request, clientName)
   const queuePath = `${basePath}/queues/${queueName}/metrics`
   const dqlPath = `${basePath}/queues/${queueName}/dlq/metrics`
   try {
@@ -87,10 +90,7 @@ export async function getQueueMessages(
   queueType,
   maxMessages
 ) {
-  const client =
-    clientName === cadsCdsClientSlug
-      ? cadsCdsClient(request)
-      : cadsBridgeClient(request)
+  const client = resolveClient(request, clientName)
   const queuePath =
     queueType === 'dlq'
       ? `${basePath}/queues/${queueName}/dlq/messages?maxMessages=${maxMessages}`
@@ -103,16 +103,28 @@ export async function getQueueMessages(
 }
 
 export async function replayDLQMessages(request, clientName, queueName) {
-  const client =
-    clientName === cadsCdsClientSlug
-      ? cadsCdsClient(request)
-      : cadsBridgeClient(request)
+  const client = resolveClient(request, clientName)
   const queuePath = `${basePath}/queues/${queueName}/dlq/replay`
   const body = {
     BatchSize: 10
   }
   try {
     return await client.post(queuePath, body)
+  } catch (error) {
+    throw Boom.badRequest(error.message)
+  }
+}
+
+export async function replayDLQMessage(
+  request,
+  clientName,
+  queueName,
+  messageId
+) {
+  const client = resolveClient(request, clientName)
+  const queuePath = `${basePath}/queues/${queueName}/dlq/replay/${messageId}`
+  try {
+    return await client.post(queuePath)
   } catch (error) {
     throw Boom.badRequest(error.message)
   }
