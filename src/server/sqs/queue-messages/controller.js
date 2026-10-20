@@ -5,6 +5,7 @@ import {
 } from '../../common/clients/requests/sqs-admin.js'
 import Boom from '@hapi/boom'
 import { format } from 'date-fns'
+import { escapeHtml } from '../../common/helpers/html-utils.js'
 
 const payloadPreviewMaxLength = 200
 const NOT_AVAILABLE = 'Not available'
@@ -69,14 +70,6 @@ function getMaxMessages(request) {
   return request.query.maxMessages || request.payload?.maxMessages || 10
 }
 
-function escapeHtml(value) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-}
 
 function buildReplayMessageActionHtml(
   client,
