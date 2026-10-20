@@ -6,7 +6,8 @@ import Boom from '@hapi/boom'
 import { sqsQueueMetricsController } from './queue-metrics/controller.js'
 import {
   sqsQueueMessagesController,
-  sqsReplayDLQMessagesController
+  sqsReplayDLQMessagesController,
+  sqsReplayDLQMessageController
 } from './queue-messages/controller.js'
 
 export function requireSqsAccess(request, h) {
@@ -58,6 +59,12 @@ export const sqsMonitoringDashboard = {
           path: '/dashboard/monitoring/sqs/{client}/{queueName}/dlq/messages/replay',
           options: routeOptions,
           ...sqsReplayDLQMessagesController
+        },
+        {
+          method: 'POST',
+          path: '/dashboard/monitoring/sqs/{client}/{queueName}/dlq/messages/replay/{messageId}',
+          options: routeOptions,
+          ...sqsReplayDLQMessageController
         }
       ])
     }

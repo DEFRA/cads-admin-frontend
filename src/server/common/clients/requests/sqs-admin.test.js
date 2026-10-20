@@ -4,7 +4,8 @@ import {
   listQueues,
   getQueueMetrics,
   getQueueMessages,
-  replayDLQMessages
+  replayDLQMessages,
+  replayDLQMessage
 } from './sqs-admin.js'
 
 vi.mock('../api-client.js', () => ({
@@ -248,6 +249,66 @@ describe('#sqs-admin requests', () => {
 
       await expect(
         replayDLQMessages(request, 'cads-cds', 'test-queue')
+      ).rejects.toMatchObject({
+        isBoom: true,
+        output: { statusCode: statusCodes.badRequest }
+      })
+    })
+  })
+
+  describe('#replayDLQMessage', () => {
+    test('Should post to the single message dlq replay endpoint for the cads-cds client', async () => {
+      const response = {
+        queue: 'CadsCds',
+        moved: 1,
+        failed: 0,
+        errors: [],
+        messageId: 'message-1'
+      }
+      client.post.mockResolvedValue(response)
+
+      const result = await replayDLQMessage(
+        request,
+        'cads-cds',
+        'test-queue',
+        'message-1'
+      )
+
+      expect(result).toEqual(response)
+      expect(createApiClient).toHaveBeenCalledWith(
+        request,
+        'https://cds.example'
+      )
+      expect(client.post).toHaveBeenCalledWith(
+        '/api/v1/systemadmin/sqs/queues/test-queue/dlq/replay/message-1'
+      )
+    })
+
+    test('Should post to the single message dlq replay endpoint for the cads-bridge client', async () => {
+      client.post.mockResolvedValue({
+        queue: 'CadsBridge',
+        moved: 1,
+        failed: 0,
+        errors: [],
+        messageId: 'message-2'
+      })
+
+      await replayDLQMessage(request, 'cads-bridge', 'test-queue', 'message-2')
+
+      expect(createApiClient).toHaveBeenCalledWith(
+        request,
+        'https://bridge.example'
+      )
+      expect(client.post).toHaveBeenCalledWith(
+        '/api/v1/systemadmin/sqs/queues/test-queue/dlq/replay/message-2'
+      )
+    })
+
+    test('Should wrap errors in a Boom bad request', async () => {
+      client.post.mockRejectedValue(new Error('Replay failed'))
+
+      await expect(
+        replayDLQMessage(request, 'cads-cds', 'test-queue', 'message-1')
       ).rejects.toMatchObject({
         isBoom: true,
         output: { statusCode: statusCodes.badRequest }
