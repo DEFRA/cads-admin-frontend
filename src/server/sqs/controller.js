@@ -11,6 +11,7 @@ export const sqsMonitoringDashboardController = {
         'Failed to fetch SQS queues. Please try again later.'
       )
       _request.logger.error(error)
+      _request.logger.error(error.message)
       return Boom.badRequest(
         'Failed to fetch SQS queues. Please try again later.'
       )
