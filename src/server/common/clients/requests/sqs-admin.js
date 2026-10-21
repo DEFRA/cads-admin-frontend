@@ -26,13 +26,14 @@ function resolveClient(request, clientName) {
 export async function listQueues(request) {
   const cadsCdsQueues = await getQueueDetails(
     cadsCdsClient(request),
+    request,
     cadsCdsClientName,
     `${basePath}/queues`
   )
   return [cadsCdsQueues]
 }
 
-async function getQueueDetails(client, clientName, requestPath) {
+async function getQueueDetails(client, request, clientName, requestPath) {
   try {
     const result = await client.get(requestPath)
     return {
@@ -49,7 +50,9 @@ async function getQueueDetails(client, clientName, requestPath) {
       }))
     }
   } catch (error) {
-    if (error.output.statusCode === statusCodes.notFound) {
+    request.logger.error(error)
+    request.logger.error(error.message)
+    if (error.output && error.output.statusCode === statusCodes.notFound) {
       return {
         name: clientName,
         slug:
