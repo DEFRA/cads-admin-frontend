@@ -36,6 +36,7 @@ describe('#sqs-admin requests', () => {
   })
 
   describe('#listQueues', () => {
+    // temporary skip until we can get the bridge client to respond with queues
     test.skip('Should map queues for both clients when both respond successfully', async () => {
       client.get
         .mockResolvedValueOnce({
