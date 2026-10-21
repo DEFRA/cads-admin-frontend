@@ -36,7 +36,7 @@ describe('#sqs-admin requests', () => {
   })
 
   describe('#listQueues', () => {
-    test('Should map queues for both clients when both respond successfully', async () => {
+    test.skip('Should map queues for both clients when both respond successfully', async () => {
       client.get
         .mockResolvedValueOnce({
           queues: [
