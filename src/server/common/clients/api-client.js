@@ -97,6 +97,8 @@ async function callApi(
 ) {
   const url = new URL(path, backendUrl).href
 
+  request.logger.info(`Calling ${url}`)
+
   // Try to get session, but don't fail if missing
   const sid = request.state.sid?.sessionId
   let token = null
