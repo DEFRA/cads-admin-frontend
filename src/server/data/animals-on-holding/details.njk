@@ -1,0 +1,123 @@
+{% extends 'layouts/page.njk' %}
+
+{% macro locationDetails(location) %}
+  {% if location %}
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Identifier: {{ location.identifier or "Not available" }}</li>
+      <li>Sub-identifier: {{ location.subIdentifier or "Not available" }}</li>
+      <li>Full identifier: {{ location.fullIdentifier or "Not available" }}</li>
+      <li>Name: {{ location.name or "Not available" }}</li>
+      <li>Premises type: {{ location.premisesType or "Not available" }}</li>
+    </ul>
+  {% else %}
+    Not available
+  {% endif %}
+{% endmacro %}
+
+{% block content %}
+  <h1 class="govuk-heading-l">{{ heading }}</h1>
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Identifier</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.animal.identifier.identifier if viewModel.animal.identifier else "Not available" }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Animal resource type</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.animal.resourceType or "Not available" }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Species</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.animal.species or "Not available" }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Sex</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.animal.sex or "Not available" }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Breed</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.animal.breedCode.breedName or viewModel.animal.breedCode.identifier if viewModel.animal.breedCode else "Not available" }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Birth date</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.animal.birthDate or "Not available" }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Registration date</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.animal.registrationDate or "Not available" }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Date on CPH</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.animal.dateOnCPH or "Not available" }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">State</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.animal.state or "Not available" }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Restriction status</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.animal.restrictionStatus or "Not available" }}</dd>
+    </div>
+  </dl>
+
+  <h2 class="govuk-heading-m">Locations</h2>
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Current location</dt>
+      <dd class="govuk-summary-list__value">{{ locationDetails(viewModel.animal.currentLocation) }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Registered location</dt>
+      <dd class="govuk-summary-list__value">{{ locationDetails(viewModel.animal.registeredLocation) }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Death location</dt>
+      <dd class="govuk-summary-list__value">{{ locationDetails(viewModel.animal.deathLocation) }}</dd>
+    </div>
+  </dl>
+
+  {% if viewModel.animal.parentage %}
+    <h2 class="govuk-heading-m">Parentage</h2>
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Relationship</dt>
+        <dd class="govuk-summary-list__value">{{ viewModel.animal.parentage.relationship or "Not available" }}</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Animal identifier</dt>
+        <dd class="govuk-summary-list__value">{{ viewModel.animal.parentage.animalIdentifier.identifier if viewModel.animal.parentage.animalIdentifier else "Not available" }}</dd>
+      </div>
+    </dl>
+  {% endif %}
+
+  <h2 class="govuk-heading-m">Record</h2>
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Event identifier</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.details.identifier.identifier if viewModel.details.identifier else "Not available" }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Event resource type</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.details.resourceType or "Not available" }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Event date and time</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.details.eventDateTime or "Not available" }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Source system</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.details.source.system or "Not available" if viewModel.details.source else "Not available" }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Source schema</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.details.source.schema or "Not available" if viewModel.details.source else "Not available" }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Source schema version</dt>
+      <dd class="govuk-summary-list__value">{{ viewModel.details.source.schemaVersion or "Not available" if viewModel.details.source else "Not available" }}</dd>
+    </div>
+  </dl>
+
+  <p class="govuk-body">
+    <a class="govuk-link" href="/dashboard/data/animals-on-holding">Back to animals on holdings</a>
+  </p>
+{% endblock %}
