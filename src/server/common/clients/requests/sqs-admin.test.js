@@ -36,8 +36,7 @@ describe('#sqs-admin requests', () => {
   })
 
   describe('#listQueues', () => {
-    // temporary skip until we can get the bridge client to respond with queues
-    test.skip('Should map queues for both clients when both respond successfully', async () => {
+    test('Should map queues for both clients when both respond successfully', async () => {
       client.get
         .mockResolvedValueOnce({
           queues: [
@@ -95,8 +94,7 @@ describe('#sqs-admin requests', () => {
         'https://bridge.example'
       )
     })
-    // temporary skip until we can get the bridge client to respond with queues
-    test.skip('Should mark a client as admin disabled when it responds with not found', async () => {
+    test('Should mark a client as admin disabled when it responds with not found', async () => {
       client.get
         .mockRejectedValueOnce({ output: { statusCode: statusCodes.notFound } })
         .mockResolvedValueOnce({ queues: [] })
@@ -111,8 +109,7 @@ describe('#sqs-admin requests', () => {
       })
     })
 
-    // temporary skip until we can get the bridge client to respond with queues
-    test.skip('Should rethrow errors that are not a not found response', async () => {
+    test('Should rethrow errors that are not a not found response', async () => {
       const error = {
         output: { statusCode: statusCodes.badRequest },
         message: 'Boom'

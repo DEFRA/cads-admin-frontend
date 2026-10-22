@@ -5,6 +5,7 @@ import Boom from '@hapi/boom'
 
 // Read-only queue management endpoints in cads-data-service and cads-bridge
 const basePath = '/api/v1/systemadmin/sqs'
+const cadsBridgeClientName = 'CADS Bridge'
 const cadsBridgeClientSlug = 'cads-bridge'
 const cadsCdsClientName = 'CADS Data Service'
 const cadsCdsClientSlug = 'cads-cds'
@@ -30,7 +31,13 @@ export async function listQueues(request) {
     cadsCdsClientName,
     `${basePath}/queues`
   )
-  return [cadsCdsQueues]
+  const cadsBridgeQueues = await getQueueDetails(
+    cadsBridgeClient(request),
+    request,
+    cadsBridgeClientName,
+    `${basePath}/queues`
+  )
+  return [cadsCdsQueues, cadsBridgeQueues]
 }
 
 async function getQueueDetails(client, request, clientName, requestPath) {

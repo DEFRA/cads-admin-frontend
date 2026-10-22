@@ -36,7 +36,7 @@ describe('#sqs-admin requests', () => {
     )
   })
 
-  it.skip('Should mark CDS as admin disabled when it returns a 404', async () => {
+  it('Should mark CDS as admin disabled when it returns a 404', async () => {
     cdsClient.get.mockRejectedValue(Boom.notFound())
     bridgeClient.get.mockResolvedValue({
       queues: [
@@ -71,7 +71,7 @@ describe('#sqs-admin requests', () => {
     })
   })
 
-  it.skip('Should mark CADS Bridge as admin disabled when it returns a 404', async () => {
+  it('Should mark CADS Bridge as admin disabled when it returns a 404', async () => {
     cdsClient.get.mockResolvedValue({ queues: [] })
     bridgeClient.get.mockRejectedValue(Boom.notFound())
 
@@ -85,7 +85,7 @@ describe('#sqs-admin requests', () => {
     })
   })
 
-  it.skip('Should mark both clients as admin disabled when both return a 404', async () => {
+  it('Should mark both clients as admin disabled when both return a 404', async () => {
     cdsClient.get.mockRejectedValue(Boom.notFound())
     bridgeClient.get.mockRejectedValue(Boom.notFound())
 
@@ -105,7 +105,7 @@ describe('#sqs-admin requests', () => {
     })
   })
 
-  it.skip('Should rethrow non-404 errors instead of disabling admin', async () => {
+  it('Should rethrow non-404 errors instead of disabling admin', async () => {
     cdsClient.get.mockRejectedValue(Boom.badImplementation())
     bridgeClient.get.mockResolvedValue({ queues: [] })
 
