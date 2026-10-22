@@ -15,7 +15,11 @@ function cadsCdsClient(request) {
 }
 
 function cadsBridgeClient(request) {
-  return createApiClient(request, getConfig().get('cadsBridgeBackendUrl'), 'bridge')
+  return createApiClient(
+    request,
+    getConfig().get('cadsBridgeBackendUrl'),
+    'bridge'
+  )
 }
 
 function resolveClient(request, clientName) {
