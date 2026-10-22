@@ -1,5 +1,7 @@
 import * as animalService from './services/animalService.js'
 
+const animalsOnHoldingPageTitle = 'Animals on Holding'
+
 const sortableColumns = [
   'Identifier',
   'BirthDate',
@@ -36,11 +38,11 @@ export const animalsOnHoldingController = {
       : 'Desc'
     const holdingResponse = cph
       ? await animalService.getAnimalsOnHolding(
-          request,
-          filters,
-          { page, pageSize },
-          { orderBy, sortDirection }
-        )
+        request,
+        filters,
+        { page, pageSize },
+        { orderBy, sortDirection }
+      )
       : null
     const holding = Array.isArray(holdingResponse)
       ? holdingResponse[0]
@@ -71,12 +73,12 @@ export const animalsOnHoldingController = {
     }))
 
     return h.view('data/animals-on-holding/index', {
-      pageTitle: 'Animals on Holding',
-      heading: 'Animals on Holding',
+      pageTitle: animalsOnHoldingPageTitle,
+      heading: animalsOnHoldingPageTitle,
       breadcrumbs: [
         { text: 'Dashboard', href: '/dashboard' },
         { text: 'Data Dashboard', href: '/dashboard/data' },
-        { text: 'Animals on Holding' }
+        { text: animalsOnHoldingPageTitle }
       ],
       viewModel: {
         cph,
@@ -111,7 +113,7 @@ export const animalsOnHoldingController = {
         { text: 'Dashboard', href: '/dashboard' },
         { text: 'Data Dashboard', href: '/dashboard/data' },
         {
-          text: 'Animals on Holding',
+          text: animalsOnHoldingPageTitle,
           href: '/dashboard/data/animals-on-holding'
         },
         {
