@@ -57,3 +57,31 @@ export function catchAll(request, h) {
     })
     .code(statusCode)
 }
+
+/**
+ * Walks the nested `cause` chain of an error and returns a flat array of
+ * `{ name, code, message, errno }` entries, outermost first. undici wraps the
+ * real socket/DNS/TLS failure several levels deep (e.g.
+ * "fetch failed" -> "Request was cancelled." -> ECONNREFUSED), so inspecting
+ * only `error.cause` hides the root cause.
+ * @param {unknown} error
+ * @returns {Array<{name?: string, code?: string, message?: string, errno?: number}>}
+ */
+export function collectCauseChain(error) {
+  const chain = []
+  let current = error
+  let depth = 0
+
+  while (current && depth < 10) {
+    chain.push({
+      name: current.name,
+      code: current.code,
+      message: current.message,
+      errno: current.errno
+    })
+    current = current.cause
+    depth += 1
+  }
+
+  return chain
+}

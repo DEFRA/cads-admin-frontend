@@ -15,7 +15,11 @@ function cadsCdsClient(request) {
 }
 
 function cadsBridgeClient(request) {
-  return createApiClient(request, getConfig().get('cadsBridgeBackendUrl'))
+  return createApiClient(
+    request,
+    getConfig().get('cadsBridgeBackendUrl'),
+    'bridge'
+  )
 }
 
 function resolveClient(request, clientName) {
@@ -27,18 +31,20 @@ function resolveClient(request, clientName) {
 export async function listQueues(request) {
   const cadsCdsQueues = await getQueueDetails(
     cadsCdsClient(request),
+    request,
     cadsCdsClientName,
     `${basePath}/queues`
   )
   const cadsBridgeQueues = await getQueueDetails(
     cadsBridgeClient(request),
+    request,
     cadsBridgeClientName,
     `${basePath}/queues`
   )
   return [cadsCdsQueues, cadsBridgeQueues]
 }
 
-async function getQueueDetails(client, clientName, requestPath) {
+async function getQueueDetails(client, request, clientName, requestPath) {
   try {
     const result = await client.get(requestPath)
     return {
@@ -55,7 +61,15 @@ async function getQueueDetails(client, clientName, requestPath) {
       }))
     }
   } catch (error) {
-    if (error.output.statusCode === statusCodes.notFound) {
+    request.logger.error(
+      {
+        err: error,
+        causeCode: error.cause?.code,
+        causeMessage: error.cause?.message
+      },
+      error.message
+    )
+    if (error.output?.statusCode === statusCodes.notFound) {
       return {
         name: clientName,
         slug:
@@ -79,6 +93,14 @@ export async function getQueueMetrics(request, clientName, queueName) {
     const dlqMetrics = await client.get(dqlPath)
     return [queueMetrics, dlqMetrics]
   } catch (error) {
+    request.logger.error(
+      {
+        err: error,
+        causeCode: error.cause?.code,
+        causeMessage: error.cause?.message
+      },
+      error.message
+    )
     throw Boom.badRequest(error.message)
   }
 }
@@ -98,6 +120,14 @@ export async function getQueueMessages(
   try {
     return await client.get(queuePath)
   } catch (error) {
+    request.logger.error(
+      {
+        err: error,
+        causeCode: error.cause?.code,
+        causeMessage: error.cause?.message
+      },
+      error.message
+    )
     throw Boom.badRequest(error.message)
   }
 }
@@ -111,6 +141,14 @@ export async function replayDLQMessages(request, clientName, queueName) {
   try {
     return await client.post(queuePath, body)
   } catch (error) {
+    request.logger.error(
+      {
+        err: error,
+        causeCode: error.cause?.code,
+        causeMessage: error.cause?.message
+      },
+      error.message
+    )
     throw Boom.badRequest(error.message)
   }
 }
@@ -126,6 +164,14 @@ export async function replayDLQMessage(
   try {
     return await client.post(queuePath)
   } catch (error) {
+    request.logger.error(
+      {
+        err: error,
+        causeCode: error.cause?.code,
+        causeMessage: error.cause?.message
+      },
+      error.message
+    )
     throw Boom.badRequest(error.message)
   }
 }

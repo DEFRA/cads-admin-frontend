@@ -35,7 +35,8 @@ describe('api-client', () => {
     request = {
       state: {},
       headers: {},
-      info: { id: 'trace-123' }
+      info: { id: 'trace-123' },
+      logger: { error: vi.fn() }
     }
 
     getConfig.mockReturnValue({

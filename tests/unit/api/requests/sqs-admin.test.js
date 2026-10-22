@@ -23,7 +23,7 @@ vi.mock('../../../../src/config/config.js', () => ({
 }))
 
 describe('#sqs-admin requests', () => {
-  const request = {}
+  const request = { logger: { error: vi.fn() } }
   let cdsClient
   let bridgeClient
 
