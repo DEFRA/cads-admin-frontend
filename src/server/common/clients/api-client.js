@@ -117,7 +117,7 @@ async function callApi(
     }
 
     const causeChain = collectCauseChain(error)
-    const rootCause = causeChain[causeChain.length - 1]
+    const rootCause = causeChain.at(causeChain.length - 1)
 
     request.logger.error(
       {
