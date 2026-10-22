@@ -2,6 +2,7 @@ import { getConfig } from '../../../config/config.js'
 import { getAccessToken } from '../../../auth/resource-tokens.js'
 import { withTraceId } from '@defra/hapi-tracing'
 import { getTracingHeaderName } from '../helpers/request-tracing.js'
+import { collectCauseChain } from '../helpers/errors.js'
 import Boom from '@hapi/boom'
 
 /*
@@ -114,6 +115,23 @@ async function callApi(
         `Backend request timed out after ${timeoutMs}ms`
       )
     }
+
+    const causeChain = collectCauseChain(error)
+    const rootCause = causeChain.at(causeChain.length - 1)
+
+    request.logger.error(
+      {
+        err: error,
+        url,
+        method: options.method,
+        causeChain,
+        rootCauseCode: rootCause?.code,
+        rootCauseMessage: rootCause?.message,
+        rootCauseErrno: rootCause?.errno
+      },
+      `Backend fetch failed: url:${url}, root cause:${rootCause?.message ?? error.message}`
+    )
+
     throw error
   }
 }

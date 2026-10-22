@@ -4,7 +4,11 @@ import { hasAnyScope } from '../../auth/helpers/extract-scopes.js'
 import { resourceScopes } from '../../auth/constants/resource-scopes.js'
 import Boom from '@hapi/boom'
 import { sqsQueueMetricsController } from './queue-metrics/controller.js'
-import { sqsQueueMessagesController } from './queue-messages/controller.js'
+import {
+  sqsQueueMessagesController,
+  sqsReplayDLQMessagesController,
+  sqsReplayDLQMessageController
+} from './queue-messages/controller.js'
 
 export function requireSqsAccess(request, h) {
   if (
@@ -46,9 +50,21 @@ export const sqsMonitoringDashboard = {
         },
         {
           method: 'GET',
-          path: '/dashboard/monitoring/sqs/{client}/{queueName}/messages',
+          path: '/dashboard/monitoring/sqs/{client}/{queueName}/{queueType}/messages',
           options: routeOptions,
           ...sqsQueueMessagesController
+        },
+        {
+          method: 'POST',
+          path: '/dashboard/monitoring/sqs/{client}/{queueName}/dlq/messages/replay',
+          options: routeOptions,
+          ...sqsReplayDLQMessagesController
+        },
+        {
+          method: 'POST',
+          path: '/dashboard/monitoring/sqs/{client}/{queueName}/dlq/messages/replay/{messageId}',
+          options: routeOptions,
+          ...sqsReplayDLQMessageController
         }
       ])
     }

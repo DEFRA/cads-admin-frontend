@@ -39,6 +39,7 @@ export const sqsQueueMetricsController = {
         }
       ],
       viewModel: {
+        client,
         queueMetrics: queueMetricsData,
         dlqMetrics: dlqMetricsData
       }

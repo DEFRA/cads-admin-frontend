@@ -23,7 +23,7 @@ vi.mock('../../../../src/config/config.js', () => ({
 }))
 
 describe('#sqs-admin requests', () => {
-  const request = {}
+  const request = { logger: { error: vi.fn() } }
   let cdsClient
   let bridgeClient
 
@@ -52,12 +52,14 @@ describe('#sqs-admin requests', () => {
 
     expect(cadsCdsResult).toEqual({
       name: 'CADS Data Service',
+      slug: 'cads-cds',
       adminEnabled: false,
       queues: []
     })
 
     expect(cadsBridgeResult).toEqual({
       name: 'CADS Bridge',
+      slug: 'cads-bridge',
       adminEnabled: true,
       queues: [
         {
@@ -77,6 +79,7 @@ describe('#sqs-admin requests', () => {
 
     expect(cadsBridgeResult).toEqual({
       name: 'CADS Bridge',
+      slug: 'cads-bridge',
       adminEnabled: false,
       queues: []
     })
@@ -90,11 +93,13 @@ describe('#sqs-admin requests', () => {
 
     expect(cadsCdsResult).toEqual({
       name: 'CADS Data Service',
+      slug: 'cads-cds',
       adminEnabled: false,
       queues: []
     })
     expect(cadsBridgeResult).toEqual({
       name: 'CADS Bridge',
+      slug: 'cads-bridge',
       adminEnabled: false,
       queues: []
     })
@@ -117,7 +122,7 @@ describe('#sqs-admin requests', () => {
 
       const [queueMetrics, dlqMetrics] = await getQueueMetrics(
         request,
-        'CADS Data Service',
+        'cads-cds',
         'queue-1'
       )
 
@@ -141,7 +146,7 @@ describe('#sqs-admin requests', () => {
 
       const [queueMetrics, dlqMetrics] = await getQueueMetrics(
         request,
-        'CADS Bridge',
+        'cads-bridge',
         'queue-2'
       )
 
@@ -162,7 +167,7 @@ describe('#sqs-admin requests', () => {
       cdsClient.get.mockRejectedValue(new Error('upstream failure'))
 
       await expect(
-        getQueueMetrics(request, 'CADS Data Service', 'queue-1')
+        getQueueMetrics(request, 'cads-cds', 'queue-1')
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
         message: 'upstream failure'
@@ -175,7 +180,7 @@ describe('#sqs-admin requests', () => {
         .mockRejectedValueOnce(new Error('dlq failure'))
 
       await expect(
-        getQueueMetrics(request, 'CADS Data Service', 'queue-1')
+        getQueueMetrics(request, 'cads-cds', 'queue-1')
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
         message: 'dlq failure'

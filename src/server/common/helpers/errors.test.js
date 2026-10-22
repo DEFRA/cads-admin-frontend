@@ -1,6 +1,6 @@
 import Boom from '@hapi/boom'
 
-import { catchAll } from './errors.js'
+import { catchAll, collectCauseChain } from './errors.js'
 import { statusCodes } from '../constants/status-codes.js'
 
 function mockRequest(response, logger) {
@@ -145,4 +145,123 @@ describe('#catchAll', () => {
       expect(viewResponse.code).toHaveBeenCalledWith(statusCodes.imATeapot)
     })
   })
+})
+
+describe('#collectCauseChain', () => {
+  test('Should return a single entry for an error with no cause', () => {
+    const error = new Error('fetch failed')
+
+    const chain = collectCauseChain(error)
+
+    expect(chain).toEqual([
+      {
+        name: 'Error',
+        code: undefined,
+        message: 'fetch failed',
+        errno: undefined
+      }
+    ])
+  })
+
+  test('Should extract name, code, message and errno from each entry', () => {
+    const error = Object.assign(new Error('fetch failed'), {
+      name: 'TypeError',
+      code: 'UND_ERR',
+      errno: -111
+    })
+
+    const [entry] = collectCauseChain(error)
+
+    expect(entry).toEqual({
+      name: 'TypeError',
+      code: 'UND_ERR',
+      message: 'fetch failed',
+      errno: -111
+    })
+  })
+
+  test('Should walk the nested cause chain, outermost first', () => {
+    const root = Object.assign(new Error('connect ECONNREFUSED'), {
+      code: 'ECONNREFUSED',
+      errno: -111
+    })
+    const middle = Object.assign(new Error('Request was cancelled.'), {
+      code: 'UND_ERR_ABORTED',
+      cause: root
+    })
+    const outer = Object.assign(new TypeError('fetch failed'), {
+      cause: middle
+    })
+
+    const chain = collectCauseChain(outer)
+
+    expect(chain).toEqual([
+      {
+        name: 'TypeError',
+        code: undefined,
+        message: 'fetch failed',
+        errno: undefined
+      },
+      {
+        name: 'Error',
+        code: 'UND_ERR_ABORTED',
+        message: 'Request was cancelled.',
+        errno: undefined
+      },
+      {
+        name: 'Error',
+        code: 'ECONNREFUSED',
+        message: 'connect ECONNREFUSED',
+        errno: -111
+      }
+    ])
+  })
+
+  test('Should surface the root cause as the last entry', () => {
+    const root = Object.assign(new Error('getaddrinfo ENOTFOUND'), {
+      code: 'ENOTFOUND'
+    })
+    const outer = Object.assign(new TypeError('fetch failed'), { cause: root })
+
+    const chain = collectCauseChain(outer)
+
+    expect(chain[chain.length - 1]).toEqual({
+      name: 'Error',
+      code: 'ENOTFOUND',
+      message: 'getaddrinfo ENOTFOUND',
+      errno: undefined
+    })
+  })
+
+  test('Should handle non-Error causes', () => {
+    const outer = Object.assign(new Error('wrapper'), {
+      cause: 'a plain string cause'
+    })
+
+    const chain = collectCauseChain(outer)
+
+    expect(chain).toHaveLength(2)
+    expect(chain[1]).toEqual({
+      name: undefined,
+      code: undefined,
+      message: undefined,
+      errno: undefined
+    })
+  })
+
+  test('Should cap traversal at 10 entries for a cyclic cause chain', () => {
+    const error = new Error('loop')
+    error.cause = error
+
+    const chain = collectCauseChain(error)
+
+    expect(chain).toHaveLength(10)
+  })
+
+  test.each([[null], [undefined]])(
+    'Should return an empty array for %s',
+    (value) => {
+      expect(collectCauseChain(value)).toEqual([])
+    }
+  )
 })

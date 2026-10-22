@@ -7,6 +7,9 @@ export const sqsMonitoringDashboardController = {
     try {
       queuesByService = await listQueues(_request)
     } catch (error) {
+      _request.logger.error(
+        'Failed to fetch SQS queues. Please try again later.'
+      )
       return Boom.badRequest(
         'Failed to fetch SQS queues. Please try again later.'
       )
