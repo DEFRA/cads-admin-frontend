@@ -114,6 +114,19 @@ async function callApi(
         `Backend request timed out after ${timeoutMs}ms`
       )
     }
+
+    request.logger.error(
+      {
+        err: error,
+        url,
+        method: options.method,
+        causeCode: error.cause?.code,
+        causeMessage: error.cause?.message,
+        causeErrno: error.cause?.errno
+      },
+      `Backend fetch failed: ${error.cause?.message ?? error.message}`
+    )
+
     throw error
   }
 }

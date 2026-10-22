@@ -50,8 +50,15 @@ async function getQueueDetails(client, request, clientName, requestPath) {
       }))
     }
   } catch (error) {
-    request.logger.error({ err: error, cause: error.cause }, error.message)
-    if (error.output && error.output.statusCode === statusCodes.notFound) {
+    request.logger.error(
+      {
+        err: error,
+        causeCode: error.cause?.code,
+        causeMessage: error.cause?.message
+      },
+      error.message
+    )
+    if (error.output?.statusCode === statusCodes.notFound) {
       return {
         name: clientName,
         slug:
@@ -75,6 +82,14 @@ export async function getQueueMetrics(request, clientName, queueName) {
     const dlqMetrics = await client.get(dqlPath)
     return [queueMetrics, dlqMetrics]
   } catch (error) {
+    request.logger.error(
+      {
+        err: error,
+        causeCode: error.cause?.code,
+        causeMessage: error.cause?.message
+      },
+      error.message
+    )
     throw Boom.badRequest(error.message)
   }
 }
@@ -94,6 +109,14 @@ export async function getQueueMessages(
   try {
     return await client.get(queuePath)
   } catch (error) {
+    request.logger.error(
+      {
+        err: error,
+        causeCode: error.cause?.code,
+        causeMessage: error.cause?.message
+      },
+      error.message
+    )
     throw Boom.badRequest(error.message)
   }
 }
@@ -107,6 +130,14 @@ export async function replayDLQMessages(request, clientName, queueName) {
   try {
     return await client.post(queuePath, body)
   } catch (error) {
+    request.logger.error(
+      {
+        err: error,
+        causeCode: error.cause?.code,
+        causeMessage: error.cause?.message
+      },
+      error.message
+    )
     throw Boom.badRequest(error.message)
   }
 }
@@ -122,6 +153,14 @@ export async function replayDLQMessage(
   try {
     return await client.post(queuePath)
   } catch (error) {
+    request.logger.error(
+      {
+        err: error,
+        causeCode: error.cause?.code,
+        causeMessage: error.cause?.message
+      },
+      error.message
+    )
     throw Boom.badRequest(error.message)
   }
 }
