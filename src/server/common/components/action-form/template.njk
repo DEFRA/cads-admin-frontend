@@ -1,0 +1,41 @@
+{% from "govuk/components/fieldset/macro.njk" import govukFieldset %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+
+<form method="post" action="{{ params.formAction }}" novalidate class="app-action-form" data-testid="action-form-{{ params.id }}">
+  {% if params.returnTo %}
+    <input type="hidden" name="returnTo" value="{{ params.returnTo }}">
+  {% endif %}
+
+  {% call govukFieldset({
+    legend: { text: params.title, classes: "govuk-fieldset__legend--s" }
+  }) %}
+    <p class="govuk-body-s">{{ params.description }}</p>
+
+    {% if params.warningText %}
+      {{ govukWarningText({ text: params.warningText }) }}
+    {% endif %}
+
+    {% if params.requiresPid %}
+      {{ govukInput({
+        id: params.id + "-pid",
+        name: "pid",
+        label: { text: "Process ID (PID)" },
+        hint: { text: "Find the PID in the Longest running queries, Idle in transaction or Locks and blocking tables" },
+        classes: "govuk-input--width-10",
+        inputmode: "numeric",
+        spellcheck: false,
+        autocomplete: "off",
+        value: params.value,
+        errorMessage: { text: params.error } if params.error
+      }) }}
+    {% endif %}
+
+    {{ govukButton({
+      text: params.buttonText,
+      classes: params.buttonClasses,
+      preventDoubleClick: true
+    }) }}
+  {% endcall %}
+</form>

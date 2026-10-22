@@ -1,0 +1,72 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "action-form/macro.njk" import appActionForm %}
+
+{% block content %}
+  {% if viewModel.errorList | length %}
+    {{ govukErrorSummary({
+      titleText: "There is a problem",
+      errorList: viewModel.errorList,
+      attributes: { "data-testid": "error-summary" }
+    }) }}
+  {% endif %}
+
+  {% if viewModel.banner %}
+    {{ govukNotificationBanner({
+      type: "success" if viewModel.banner.type == "success",
+      text: viewModel.banner.text,
+      attributes: { "data-testid": "action-banner" }
+    }) }}
+  {% endif %}
+
+  {{ appHeading({
+    text: heading,
+    caption: "Detailed monitoring view. This view is read-only."
+  }) }}
+
+  {{ appSubNavigation({
+    label: "DB Monitoring",
+    items: viewModel.subNavigation
+  }) }}
+
+  {{ govukBackLink({
+    text: "Back to Postgres Performance Monitoring",
+    href: viewModel.backHref
+  }) }}
+
+  {% if viewModel.metric %}
+    <p class="govuk-body">{{ viewModel.metric.description }}</p>
+
+    {% if viewModel.metric.table.rows | length %}
+      <div class="app-table-scroll" role="region" aria-label="{{ heading }} data" tabindex="0">
+        {{ govukTable({
+          caption: heading,
+          captionClasses: "govuk-visually-hidden",
+          head: viewModel.metric.table.head,
+          rows: viewModel.metric.table.rows,
+          classes: "govuk-table--small-text-until-tablet",
+          attributes: { "data-testid": "detail-table" }
+        }) }}
+      </div>
+    {% else %}
+      <p class="govuk-body" data-testid="detail-empty">There is no data to show.</p>
+    {% endif %}
+  {% endif %}
+
+  {% if viewModel.actions | length %}
+    <section aria-labelledby="section-actions" data-testid="section-actions">
+      <h2 class="govuk-heading-m" id="section-actions">Actions</h2>
+      <div class="govuk-grid-row">
+        {% for action in viewModel.actions %}
+          <div class="govuk-grid-column-one-half">
+            {{ appActionForm(action) }}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

@@ -28,7 +28,6 @@ This service now runs as part of the unified CADS local platform, alongside the 
   - [Docker Compose](#docker-compose)
 - [Auth configuration: Resources, roles and permissions](#auth-configuration-resources-roles-and-permissions)
   - [OAuth resources](#oauth-resources)
-  - [Roles](#roles)
 - [Azure AD Configuration](#azure-ad-configuration)
 - [Dependabot](#dependabot)
 - [SonarCloud](#sonarcloud)
@@ -264,12 +263,6 @@ npm run dev
 - `admin.s3.manager`
 - `admin.queue.manager`
 
-### Roles
-
-**CADS ADMIN MONITORING: Roles**
-
-- `cads-admin-superuser`
-
 ## Azure AD Configuration
 
 ### DEV
@@ -283,7 +276,6 @@ npm run dev
 - Redirect URL: https://cads-admin-frontend.dev.cdp-int.defra.cloud/auth/callback
 - Logout URL: https://cads-admin-frontend.dev.cdp-int.defra.cloud/auth/sign-out
 - Implicit grant: access tokens and ID tokens
-- Roles: cads-admin-superuser
 - Refresh: offline access
 - API permissions to `O365-CADS-ADMIN-DEV` (`8b348f4e-a99a-464e-ba26-5fd8bdbf5759`) as an authorised client app to `O365-CADS-CDS-DEV` (`e5acc07b-a696-4998-9bb6-93573ec237b3`)
   - With scope: `api://e5acc07b-a696-4998-9bb6-93573ec237b3/admin.db.execute"`

@@ -1,5 +1,6 @@
 import { hasScope } from '../../auth/helpers/extract-scopes.js'
 import { resourceScopes } from '../../auth/constants/resource-scopes.js'
+import { canViewDbMonitoring } from '../db/helpers/db-monitoring-access.js'
 
 export const monitoringController = {
   async handler(request, h) {
@@ -11,6 +12,7 @@ export const monitoringController = {
         { text: 'Monitoring' }
       ],
       viewModel: {
+        canViewDbMonitoring: canViewDbMonitoring(request),
         canViewS3: hasScope(request, resourceScopes.cadsCds.adminS3Manager)
       }
     })

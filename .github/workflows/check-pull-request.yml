@@ -43,6 +43,9 @@ jobs:
       - name: Run Tests
         run: npm test
 
+      - name: Run Integration Tests (OIDC mock)
+        run: npm run test:integration
+
       - name: SonarCloud Scan
         if: github.actor != 'dependabot[bot]'
         uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9

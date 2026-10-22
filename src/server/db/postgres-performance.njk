@@ -1,0 +1,81 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "chart/macro.njk" import appChart %}
+{% from "action-form/macro.njk" import appActionForm %}
+
+{% block content %}
+  {% if viewModel.errorList | length %}
+    {{ govukErrorSummary({
+      titleText: "There is a problem",
+      errorList: viewModel.errorList,
+      attributes: { "data-testid": "error-summary" }
+    }) }}
+  {% endif %}
+
+  {% if viewModel.banner %}
+    {{ govukNotificationBanner({
+      type: "success" if viewModel.banner.type == "success",
+      text: viewModel.banner.text,
+      attributes: { "data-testid": "action-banner" }
+    }) }}
+  {% endif %}
+
+  {{ appHeading({
+    text: heading,
+    caption: "Summary view of PostgreSQL activity, performance and storage health."
+  }) }}
+
+  {{ appSubNavigation({
+    label: "DB Monitoring",
+    items: viewModel.subNavigation
+  }) }}
+
+  {% if viewModel.headlineFigures | length %}
+    <section aria-label="Database health summary" class="govuk-!-margin-bottom-4" data-testid="headline-figures">
+      <div class="govuk-grid-row">
+        {% for figure in viewModel.headlineFigures %}
+          <div class="govuk-grid-column-one-quarter">
+            <div class="govuk-summary-card">
+              <div class="govuk-summary-card__content">
+                <p class="govuk-body-s govuk-!-margin-bottom-1" id="figure-{{ figure.id }}-label">{{ figure.label }}</p>
+                <p class="govuk-heading-l govuk-!-margin-bottom-0" aria-describedby="figure-{{ figure.id }}-label"
+                  data-testid="figure-{{ figure.id }}">{{ figure.text }}</p>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% for section in viewModel.sections %}
+    <section aria-labelledby="section-{{ section.id }}" class="govuk-!-margin-bottom-4" data-testid="section-{{ section.id }}">
+      <h2 class="govuk-heading-m" id="section-{{ section.id }}">{{ section.title }}</h2>
+      <div class="govuk-grid-row">
+        {% for card in section.cards %}
+          <div class="govuk-grid-column-{{ card.width }}">
+            {{ appChart(card) }}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endfor %}
+
+  <section aria-labelledby="section-actions" class="govuk-!-margin-bottom-4" data-testid="section-actions">
+    <h2 class="govuk-heading-m" id="section-actions">Actions</h2>
+    <div class="govuk-grid-row">
+      {% for action in viewModel.actions %}
+        <div class="govuk-grid-column-one-third">
+          {{ appActionForm(action) }}
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}
+
+{% block bodyEnd %}
+  {{ super() }}
+  <script type="module" src="{{ getAssetPath('db-monitoring.js') }}"></script>
+{% endblock %}

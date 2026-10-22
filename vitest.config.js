@@ -14,6 +14,8 @@ export default defineConfig({
     mockReset: true,
     setupFiles: ['tests/setup/vitest.setup.js'],
     include: ['tests/**/*.{test,spec}.{js,ts}', 'src/**/*.{test,spec}.{js,ts}'],
+    // Need Docker, so run separately with npm run test:integration
+    exclude: [...configDefaults.exclude, 'tests/**/*.oidc.test.js'],
     coverage: {
       provider: 'v8',
       reportsDirectory: './coverage',

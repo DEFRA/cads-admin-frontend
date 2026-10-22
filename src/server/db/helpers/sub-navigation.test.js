@@ -1,0 +1,41 @@
+import { buildDbMonitoringSubNavigation } from './sub-navigation.js'
+
+describe('#buildDbMonitoringSubNavigation', () => {
+  test('Should list the DB Monitoring pages, Postgres first', () => {
+    expect(
+      buildDbMonitoringSubNavigation({
+        path: '/dashboard/monitoring/db/postgres-performance'
+      })
+    ).toEqual([
+      {
+        text: 'Postgres Performance Monitoring',
+        href: '/dashboard/monitoring/db/postgres-performance',
+        current: true
+      },
+      {
+        text: 'CTS Parallel Import Monitoring',
+        href: '/dashboard/monitoring/db/cts-import',
+        current: false
+      }
+    ])
+  })
+
+  test.each([
+    ['/dashboard/monitoring/db/postgres-performance/active_queries', 0],
+    ['/dashboard/monitoring/db/cts-import', 1]
+  ])('Should mark the current page for %s', (path, currentIndex) => {
+    const items = buildDbMonitoringSubNavigation({ path })
+
+    expect(items.map((item) => item.current)).toEqual(
+      items.map((_, index) => index === currentIndex)
+    )
+  })
+
+  test('Should not match a path that only shares a prefix', () => {
+    const items = buildDbMonitoringSubNavigation({
+      path: '/dashboard/monitoring/db/postgres-performance-old'
+    })
+
+    expect(items.some((item) => item.current)).toBe(false)
+  })
+})

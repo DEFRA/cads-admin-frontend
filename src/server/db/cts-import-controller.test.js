@@ -81,25 +81,13 @@ describe('#ctsImportController', () => {
   }
 
   describe('access', () => {
-    test.each([
-      [
-        'the cads-admin-superuser role',
-        credentials({ scopes: ['admin.db.execute'] })
-      ],
-      [
-        'the admin.db.execute scope',
-        credentials({ roles: ['cads-admin-superuser'] })
-      ]
-    ])(
-      'Should redirect to the Unauthorised page without %s',
-      async (_, creds) => {
-        const { response } = await getPage(undefined, creds)
+    test('Should redirect to the Unauthorised page without the admin.db.execute scope', async () => {
+      const { response } = await getPage(undefined, credentials())
 
-        expect(response.statusCode).toBe(302)
-        expect(response.headers.location).toBe('/unauthorised')
-        expect(fetch).not.toHaveBeenCalled()
-      }
-    )
+      expect(response.statusCode).toBe(302)
+      expect(response.headers.location).toBe('/unauthorised')
+      expect(fetch).not.toHaveBeenCalled()
+    })
   })
 
   describe('run selection', () => {

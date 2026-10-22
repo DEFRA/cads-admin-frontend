@@ -23,6 +23,11 @@
     caption: "Progress and errors for CTS parallel import runs. This view is read-only."
   }) }}
 
+  {{ appSubNavigation({
+    label: "DB Monitoring",
+    items: viewModel.subNavigation
+  }) }}
+
   {% if viewModel.runsLoaded and not viewModel.runItems | length %}
     {{ govukInsetText({
       text: "There are no CTS parallel import runs.",

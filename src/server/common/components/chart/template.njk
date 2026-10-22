@@ -1,0 +1,69 @@
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+
+{#
+  A summary card holding one metric: a D3 chart (drawn in the browser from
+  data-chart), or a key figure for metrics without a chart, plus the data
+  table behind it so the content does not depend on the chart.
+#}
+{% set titleId = params.id + "-title" %}
+{% set descriptionId = params.id + "-description" %}
+{% set tableHtml %}
+  <div class="app-table-scroll" role="region" aria-label="{{ params.title }} data" tabindex="0">
+    {{ govukTable({
+      caption: params.title,
+      captionClasses: "govuk-visually-hidden",
+      head: params.table.head,
+      rows: params.table.rows,
+      classes: "govuk-table--small-text-until-tablet",
+      attributes: { "data-testid": "metric-table" }
+    }) }}
+  </div>
+  {% if params.totalRows > params.shownRows %}
+    <p class="govuk-body-s" data-testid="metric-rows-shown">Showing {{ params.shownRows }} of {{ params.totalRows }} rows.</p>
+  {% endif %}
+{% endset %}
+
+<div class="govuk-summary-card app-chart" id="{{ params.id }}" data-testid="metric-card" data-command="{{ params.command }}">
+  <div class="govuk-summary-card__title-wrapper">
+    <h3 class="govuk-summary-card__title" id="{{ titleId }}">{{ params.title }}</h3>
+    {% if params.detailHref %}
+      <ul class="govuk-summary-card__actions">
+        <li class="govuk-summary-card__action">
+          <a class="govuk-link" href="{{ params.detailHref }}" data-testid="metric-detail-link">View details<span class="govuk-visually-hidden"> for {{ params.title | lower }}</span></a>
+        </li>
+      </ul>
+    {% endif %}
+  </div>
+  <div class="govuk-summary-card__content">
+    <p class="govuk-body-s" id="{{ descriptionId }}">{{ params.description }}</p>
+
+    {% if params.error %}
+      <p class="govuk-error-message" data-testid="metric-error">
+        <span class="govuk-visually-hidden">Error:</span> {{ params.error }}
+      </p>
+    {% else %}
+      {% if params.summaryLabel %}
+        <p class="govuk-heading-l govuk-!-margin-bottom-1" data-testid="metric-summary-value">{{ params.summaryValue }}</p>
+        <p class="govuk-body-s">{{ params.summaryLabel }}</p>
+      {% endif %}
+
+      {% if params.chart %}
+        <figure class="app-chart__figure" data-module="app-chart" data-chart="{{ params.chart | dump }}"
+          aria-labelledby="{{ titleId }}" aria-describedby="{{ descriptionId }}" data-testid="metric-chart"></figure>
+      {% endif %}
+
+      {% if not params.table.rows | length %}
+        <p class="govuk-body" data-testid="metric-empty">There is no data to show.</p>
+      {% elif params.chart %}
+        {{ govukDetails({
+          summaryText: "Show data table",
+          html: tableHtml,
+          classes: "govuk-!-margin-bottom-0"
+        }) }}
+      {% else %}
+        {{ tableHtml | safe }}
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
