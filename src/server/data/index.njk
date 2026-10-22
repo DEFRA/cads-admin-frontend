@@ -1,0 +1,34 @@
+{% extends 'layouts/page.njk' %}
+
+{% block content %}
+  {{ appHeading({
+    text: heading,
+    caption: "Select an option from below."
+  }) }}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column">
+      <div class="govuk-body" data-testid="app-page-body">
+        <main class="govuk-main-wrapper ">
+            <div class="govuk-grid-row">
+              <div class="govuk-grid-column-one-half portal-card" data-testid="data-item">
+                <a href="/dashboard/data/animals-on-holding" class="portal-card-link">
+                  <div class="govuk-summary-card">
+                    <div class="govuk-summary-card__title-wrapper">
+                      <h2 class="govuk-summary-card__title" data-testid="data-item-title">Animals on Holding</h2>
+                    </div>
+                    <div class="govuk-summary-card__content">
+                      <p class="govuk-body-s" data-testid=data-item-description">
+                        Query animals on holding data
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

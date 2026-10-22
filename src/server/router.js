@@ -8,6 +8,8 @@ import { dbMonitoringDashboard } from './db/index.js'
 import { s3MonitoringDashboard } from './s3/index.js'
 import { sqsMonitoringDashboard } from './sqs/index.js'
 import { unauthorised } from './unauthorised/index.js'
+import { dataDashboard } from './data/index.js'
+import { animalsOnHoldingDashboard } from './data/animals-on-holding/index.js'
 
 import { getStaticFilesToServe } from './common/helpers/serve-static-files.js'
 
@@ -28,6 +30,8 @@ export const router = {
         dbMonitoringDashboard,
         s3MonitoringDashboard,
         sqsMonitoringDashboard,
+        dataDashboard,
+        animalsOnHoldingDashboard,
         unauthorised
       ])
 

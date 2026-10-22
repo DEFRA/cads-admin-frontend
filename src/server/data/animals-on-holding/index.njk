@@ -1,0 +1,126 @@
+{% extends 'layouts/page.njk' %}
+
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/pagination/macro.njk" import govukPagination %}
+
+{% macro sortableHeader(label, column, viewModel) %}
+  {% set ariaSort = "none" %}
+  {% if viewModel.sort.orderBy == column %}
+    {% set ariaSort = "descending" %}
+    {% if viewModel.sort.sortDirection == "Asc" %}
+      {% set ariaSort = "ascending" %}
+    {% endif %}
+  {% endif %}
+  <th scope="col" class="govuk-table__header" aria-sort="{{ ariaSort }}">
+    <a href="{{ viewModel.sortLinks[column] }}" class="govuk-link">{{ label }}{% if viewModel.sort.orderBy == column %}<span aria-hidden="true">{% if viewModel.sort.sortDirection == 'Asc' %}&uarr;{% else %}&darr;{% endif %}</span>{% endif %}</a>
+  </th>
+{% endmacro %}
+
+{% block content %}
+  <h1 class="govuk-heading-l">{{ heading }}</h1>
+
+  <form method="get" action="/dashboard/data/animals-on-holding" role="search" aria-label="Filter animals on holding" data-omit-empty-parameters>
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-one-third">
+        {{ govukInput({
+          id: "cph",
+          name: "cph",
+          label: { text: "CPH", classes: "govuk-label--s" },
+          value: viewModel.cph,
+          classes: "govuk-input--width-10",
+          autocomplete: "off",
+          attributes: { required: true }
+        }) }}
+      </div>
+      <div class="govuk-grid-column-one-third">
+        {{ govukInput({
+          id: "breedCode",
+          name: "breedCode",
+          label: { text: "Breed code", classes: "govuk-label--s" },
+          value: viewModel.breedCode,
+          autocomplete: "off"
+        }) }}
+      </div>
+      <div class="govuk-grid-column-one-third">
+        {{ govukSelect({
+          id: "sex",
+          name: "sex",
+          label: { text: "Sex", classes: "govuk-label--s" },
+          items: [
+            { value: "", text: "All" },
+            { value: "Female", text: "Female", selected: viewModel.sex == "Female" },
+            { value: "Male", text: "Male", selected: viewModel.sex == "Male" }
+          ]
+        }) }}
+      </div>
+    </div>
+    {{ govukButton({ text: "Apply filters", preventDoubleClick: true }) }}
+  </form>
+
+  {% if viewModel.holding %}
+    <h2 class="govuk-heading-m">
+      {{ viewModel.holding.CPH.identifier if viewModel.holding.CPH else "Holding details unavailable" }}
+    </h2>
+    <p class="govuk-body">{{ viewModel.holding.LocationName or "Location not available" }}</p>
+
+    {% if viewModel.animals.length %}
+      <table class="govuk-table" data-testid="animals-table">
+        <caption class="govuk-table__caption govuk-table__caption--s">Animals on this holding</caption>
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            {{ sortableHeader("Identifier", "Identifier", viewModel) }}
+            <th scope="col" class="govuk-table__header">Species</th>
+            {{ sortableHeader("Sex", "Sex", viewModel) }}
+            {{ sortableHeader("Breed", "BreedCode", viewModel) }}
+            <th scope="col" class="govuk-table__header">Status</th>
+            {{ sortableHeader("Birth date", "BirthDate", viewModel) }}
+            {{ sortableHeader("Date on CPH", "DateOnCPH", viewModel) }}
+            <th scope="col" class="govuk-table__header">Date off CPH</th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          {% for animal in viewModel.animals %}
+            <tr class="govuk-table__row">
+              <th scope="row" class="govuk-table__header">
+                {% if animal.detailUrl %}
+                  <a href="{{ animal.detailUrl }}" class="govuk-link">
+                    {{ animal.identifier.identifier }}
+                  </a>
+                {% else %}
+                  {{ animal.identifier.identifier if animal.identifier else "Not available" }}
+                {% endif %}
+              </th>
+              <td class="govuk-table__cell">{{ animal.species or "Not available" }}</td>
+              <td class="govuk-table__cell">{{ animal.sex or "Not available" }}</td>
+              <td class="govuk-table__cell">{{ animal.breedCode.breedName or animal.breedCode.identifier if animal.breedCode else "Not available" }}</td>
+              <td class="govuk-table__cell">{{ animal.status or "Not available" }}</td>
+              <td class="govuk-table__cell">{{ animal.birthDate or "Not available" }}</td>
+              <td class="govuk-table__cell">{{ animal.dateOnCPH or "Not available" }}</td>
+              <td class="govuk-table__cell">{{ animal.dateOffCPH or "Not available" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="govuk-body">No animals found for this holding.</p>
+    {% endif %}
+{% else %}
+  <p class="govuk-body" data-testid="no-holdings">No animals on holding found.</p>
+{% endif %}
+
+{% if viewModel.pagination.previous or viewModel.pagination.next %}
+  {{ govukPagination({
+    previous: {
+      href: viewModel.pagination.previous.href,
+      labelText: "Page " + (viewModel.page - 1)
+    } if viewModel.pagination.previous,
+    next: {
+      href: viewModel.pagination.next.href,
+      labelText: "Page " + (viewModel.page + 1)
+    } if viewModel.pagination.next,
+    landmarkLabel: "Animals on holding results"
+  }) }}
+{% endif %}
+{% endblock %}
