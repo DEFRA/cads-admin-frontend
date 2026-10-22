@@ -2,35 +2,8 @@ import { getConfig } from '../../../config/config.js'
 import { getAccessToken } from '../../../auth/resource-tokens.js'
 import { withTraceId } from '@defra/hapi-tracing'
 import { getTracingHeaderName } from '../helpers/request-tracing.js'
+import { collectCauseChain } from '../helpers/errors.js'
 import Boom from '@hapi/boom'
-
-/**
- * Walks the nested `cause` chain of an error and returns a flat array of
- * `{ name, code, message, errno }` entries, outermost first. undici wraps the
- * real socket/DNS/TLS failure several levels deep (e.g.
- * "fetch failed" -> "Request was cancelled." -> ECONNREFUSED), so inspecting
- * only `error.cause` hides the root cause.
- * @param {unknown} error
- * @returns {Array<{name?: string, code?: string, message?: string, errno?: number}>}
- */
-function collectCauseChain(error) {
-  const chain = []
-  let current = error
-  let depth = 0
-
-  while (current && depth < 10) {
-    chain.push({
-      name: current.name,
-      code: current.code,
-      message: current.message,
-      errno: current.errno
-    })
-    current = current.cause
-    depth += 1
-  }
-
-  return chain
-}
 
 /*
   Usage:
@@ -97,8 +70,6 @@ async function callApi(
 ) {
   const url = new URL(path, backendUrl).href
 
-  request.logger.error(`Calling ${url}`)
-
   // Try to get session, but don't fail if missing
   const sid = request.state.sid?.sessionId
   let token = null
@@ -158,7 +129,7 @@ async function callApi(
         rootCauseMessage: rootCause?.message,
         rootCauseErrno: rootCause?.errno
       },
-      `Backend fetch failed: ${rootCause?.message ?? error.message}`
+      `Backend fetch failed: url:${url}, root cause:${rootCause?.message ?? error.message}`
     )
 
     throw error
