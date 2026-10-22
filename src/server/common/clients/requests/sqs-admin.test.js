@@ -91,7 +91,8 @@ describe('#sqs-admin requests', () => {
       )
       expect(createApiClient).toHaveBeenCalledWith(
         request,
-        'https://bridge.example'
+        'https://bridge.example',
+        'bridge'
       )
     })
     test('Should mark a client as admin disabled when it responds with not found', async () => {
@@ -150,7 +151,8 @@ describe('#sqs-admin requests', () => {
 
       expect(createApiClient).toHaveBeenCalledWith(
         request,
-        'https://bridge.example'
+        'https://bridge.example',
+        'bridge'
       )
     })
 
@@ -190,7 +192,8 @@ describe('#sqs-admin requests', () => {
 
       expect(createApiClient).toHaveBeenCalledWith(
         request,
-        'https://bridge.example'
+        'https://bridge.example',
+        'bridge'
       )
       expect(client.get).toHaveBeenCalledWith(
         '/api/v1/systemadmin/sqs/queues/test-queue/messages?maxMessages=10'
@@ -239,7 +242,8 @@ describe('#sqs-admin requests', () => {
 
       expect(createApiClient).toHaveBeenCalledWith(
         request,
-        'https://bridge.example'
+        'https://bridge.example',
+        'bridge'
       )
     })
 
@@ -296,7 +300,8 @@ describe('#sqs-admin requests', () => {
 
       expect(createApiClient).toHaveBeenCalledWith(
         request,
-        'https://bridge.example'
+        'https://bridge.example',
+        'bridge'
       )
       expect(client.post).toHaveBeenCalledWith(
         '/api/v1/systemadmin/sqs/queues/test-queue/dlq/replay/message-2'
