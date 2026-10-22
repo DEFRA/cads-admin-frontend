@@ -38,11 +38,11 @@ export const animalsOnHoldingController = {
       : 'Desc'
     const holdingResponse = cph
       ? await animalService.getAnimalsOnHolding(
-        request,
-        filters,
-        { page, pageSize },
-        { orderBy, sortDirection }
-      )
+          request,
+          filters,
+          { page, pageSize },
+          { orderBy, sortDirection }
+        )
       : null
     const holding = Array.isArray(holdingResponse)
       ? holdingResponse[0]
