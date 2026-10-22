@@ -50,8 +50,7 @@ async function getQueueDetails(client, request, clientName, requestPath) {
       }))
     }
   } catch (error) {
-    request.logger.error(error)
-    request.logger.error(error.message)
+    request.logger.error({ err: error, cause: error.cause }, error.message)
     if (error.output && error.output.statusCode === statusCodes.notFound) {
       return {
         name: clientName,
