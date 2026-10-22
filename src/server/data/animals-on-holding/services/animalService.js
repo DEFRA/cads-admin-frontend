@@ -28,7 +28,7 @@ export async function getAnimalsOnHolding(request, filter, paging, sorting) {
   }
 
   const queryString = query.toString()
-  const url = `${basePath}${queryString ? `?${queryString}` : ''}`
+  const url = `${basePath}${queryString ? '?' + queryString : ''}`
   const response = await cdsClient(request).get(url)
   return response.result ?? response
 }

@@ -1,11 +1,13 @@
+const pageTitle = 'Data Dashboard'
+
 export const dataController = {
   async handler(_request, h) {
     return h.view('data/index', {
-      pageTitle: 'Data Dashboard',
-      heading: 'Data Dashboard',
+      pageTitle: pageTitle,
+      heading: pageTitle,
       breadcrumbs: [
         { text: 'Dashboard', href: '/dashboard' },
-        { text: 'Data Dashboard' }
+        { text: pageTitle }
       ]
     })
   }
