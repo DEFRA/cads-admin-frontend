@@ -22,7 +22,7 @@ export const animalsOnHoldingController = {
       ? requestedSex
       : undefined
     const filters = {
-      cph,
+      ...(cph ? { cph } : {}),
       ...(breedCode ? { breedCode } : {}),
       ...(sex ? { sex } : {})
     }

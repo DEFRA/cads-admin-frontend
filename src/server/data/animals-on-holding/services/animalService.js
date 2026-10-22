@@ -30,7 +30,7 @@ export async function getAnimalsOnHolding(request, filter, paging, sorting) {
   const queryString = query.toString()
   const url = `${basePath}${queryString ? `?${queryString}` : ''}`
   const response = await cdsClient(request).get(url)
-  return response
+  return response.result ?? response
 }
 
 /**
@@ -41,5 +41,5 @@ export async function getAnimalsOnHolding(request, filter, paging, sorting) {
 export async function getAnimalDetails(request, identifier) {
   const url = `${basePath}/${encodeURIComponent(identifier)}`
   const response = await cdsClient(request).get(url)
-  return response
+  return response.result ?? response
 }

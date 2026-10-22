@@ -27,12 +27,12 @@ describe('#dataController', () => {
     beforeAll(async () => {
       response = await server.inject({
         method: 'GET',
-        url: '/data'
+        url: '/dashboard/data'
       })
     })
 
     test('Should show data page', async () => {
-      expect(response.result).toEqual(expect.stringContaining('Data |'))
+      expect(response.result).toContain('Data Dashboard')
       expect(response.statusCode).toBe(statusCodes.ok)
     })
   })

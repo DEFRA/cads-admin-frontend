@@ -25,14 +25,14 @@ describe('#getAnimalsOnHolding', () => {
     await expect(
       getAnimalsOnHolding(
         request,
-        { CPH: '12/34 & 56', unused: undefined },
+        { cph: '12/34 & 56', unused: undefined },
         { pageSize: 10, page: 1 },
-        { sortDirection: 'desc' }
+        { sortDirection: 'Desc' }
       )
     ).resolves.toEqual([])
 
     expect(client.get).toHaveBeenCalledWith(
-      '/api/v1/api/animals/animals?CPH=12%2F34+%26+56&pageSize=10&page=1&sortDirection=desc'
+      '/api/v1/bovine/animals?cph=12%2F34+%26+56&pageSize=10&page=1&sortDirection=Desc'
     )
   })
 
@@ -41,7 +41,7 @@ describe('#getAnimalsOnHolding', () => {
 
     await getAnimalsOnHolding(request, {}, {}, {})
 
-    expect(client.get).toHaveBeenCalledWith('/api/v1/api/animals/animals')
+    expect(client.get).toHaveBeenCalledWith('/api/v1/bovine/animals')
   })
 
   test('Should return animal details from the details endpoint', async () => {
@@ -53,6 +53,6 @@ describe('#getAnimalsOnHolding', () => {
 
     await expect(getAnimalDetails(request, 'A123')).resolves.toEqual(details)
 
-    expect(client.get).toHaveBeenCalledWith('/api/v1/api/animals/animals/A123')
+    expect(client.get).toHaveBeenCalledWith('/api/v1/bovine/animals/A123')
   })
 })

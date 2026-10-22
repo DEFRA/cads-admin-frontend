@@ -28,7 +28,7 @@ describe('#animalsOnHoldingController', () => {
   })
 
   describe('GET animals on holding pages', () => {
-    test('Should render the holdings list', async () => {
+    test('Should render the holdings list for the supplied CPH', async () => {
       animalService.getAnimalsOnHolding.mockResolvedValue([
         {
           CPH: { schema: 'CPH', identifier: '12/34/56' },
@@ -39,7 +39,7 @@ describe('#animalsOnHoldingController', () => {
 
       const response = await server.inject({
         method: 'GET',
-        url: '/dashboard/data/animals-on-holding'
+        url: '/dashboard/data/animals-on-holding?cph=12%2F34%2F56'
       })
 
       expect(response.statusCode).toBe(statusCodes.ok)
@@ -47,19 +47,32 @@ describe('#animalsOnHoldingController', () => {
       expect(response.result).toContain('12/34/56')
       expect(response.result).toContain('name="cph"')
       expect(response.result).toContain('required')
-      expect(response.result).toContain('value="1234"')
+      expect(response.result).toContain('value="12/34/56"')
       expect(response.result).toContain(
         '/dashboard/data/animals-on-holding/A123'
       )
       expect(animalService.getAnimalsOnHolding).toHaveBeenCalledWith(
         expect.anything(),
-        { cph: '1234' },
+        { cph: '12/34/56' },
         { page: 1, pageSize: 10 },
         { orderBy: 'Identifier', sortDirection: 'Desc' }
       )
     })
 
-    test('Should use the supplied CPH instead of the default', async () => {
+    test('Should not fetch holdings when no CPH is supplied', async () => {
+      const response = await server.inject({
+        method: 'GET',
+        url: '/dashboard/data/animals-on-holding'
+      })
+
+      expect(response.statusCode).toBe(statusCodes.ok)
+      expect(response.result).toContain('data-testid="no-holdings"')
+      expect(response.result).not.toContain('value="1234"')
+      expect(response.result).not.toContain('cph=undefined')
+      expect(animalService.getAnimalsOnHolding).not.toHaveBeenCalled()
+    })
+
+    test('Should use the supplied CPH', async () => {
       animalService.getAnimalsOnHolding.mockResolvedValue([])
 
       const response = await server.inject({
