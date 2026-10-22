@@ -27,7 +27,7 @@ vi.mock('../../../../config/config.js', () => ({
 }))
 
 describe('#sqs-admin requests', () => {
-  const request = {}
+  const request = { logger: { error: vi.fn() } }
   const client = { get: vi.fn(), post: vi.fn() }
 
   beforeEach(() => {
