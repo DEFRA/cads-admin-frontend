@@ -120,7 +120,7 @@ export const ctsImportController = {
           }
         : null
 
-    if (fullTable && result.rows?.length) {
+    if (fullTable && result?.rows?.length) {
       return h
         .view('db/cts-import-full', {
           pageTitle,
