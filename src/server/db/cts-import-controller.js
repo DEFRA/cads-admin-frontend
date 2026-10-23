@@ -103,7 +103,6 @@ export const ctsImportController = {
     const runs = runsOutcome.status === 'fulfilled' ? runsOutcome.value : []
     const selectedRunId = query.runId ?? String(runs[0]?.runId ?? '')
     const selectedCommand = query.command ?? ctsImportCommands[0].value
-
     const errorList = [
       ...Object.entries(fieldErrors).map(([field, text]) => ({
         text,
@@ -111,7 +110,6 @@ export const ctsImportController = {
       })),
       ...(errorMessage ? [{ text: errorMessage }] : [])
     ]
-
     const result =
       commandOutcome.status === 'fulfilled' && commandOutcome.value
         ? {
