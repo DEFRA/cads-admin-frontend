@@ -97,7 +97,11 @@ export function buildResultTable(command, result) {
     rows: rows.map((row) =>
       command.columns.map((column) => ({
         text: formatCell(column, row?.[column.key]),
-        ...(column.numeric ? { format: 'numeric' } : {})
+        ...(column.numeric
+          ? { format: 'numeric' }
+          : column.date
+            ? { format: 'date' }
+            : {})
       }))
     )
   }
