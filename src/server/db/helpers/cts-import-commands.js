@@ -86,19 +86,35 @@ function formatCell(column, value) {
   return String(value)
 }
 
+function columnFormat(column) {
+  if (column.numeric) {
+    return 'numeric'
+  }
+  if (column.date) {
+    return 'date'
+  }
+  return null
+}
+
 export function buildResultTable(command, result) {
   const rows = Array.isArray(result) ? result : []
 
   return {
-    head: command.columns.map((column) => ({
-      text: column.text,
-      ...(column.numeric ? { format: 'numeric' } : {})
-    })),
+    head: command.columns.map((column) => {
+      const format = columnFormat(column)
+      return {
+        text: column.text,
+        ...(format ? { format } : {})
+      }
+    }),
     rows: rows.map((row) =>
-      command.columns.map((column) => ({
-        text: formatCell(column, row?.[column.key]),
-        ...(column.numeric ? { format: 'numeric' } : {})
-      }))
+      command.columns.map((column) => {
+        const format = columnFormat(column)
+        return {
+          text: formatCell(column, row?.[column.key]),
+          ...(format ? { format } : {})
+        }
+      })
     )
   }
 }

@@ -210,6 +210,56 @@ describe('#ctsImportController', () => {
     })
   })
 
+  describe('full table view', () => {
+    const resultPath =
+      '/dashboard/monitoring/db/cts-import?runId=1&command=deferred_errors'
+
+    function mockResult() {
+      return mockCdsApi({
+        runs: () => runsResponse(),
+        deferred_errors: () =>
+          jsonResponse({
+            command: 'deferred_errors',
+            result: [{ table_name: 'cts_animal', error: 'bad date', rows: 12 }]
+          })
+      })
+    }
+
+    test('Should link to the full table view preserving the query', async () => {
+      mockResult()
+
+      const { $ } = await getPage(resultPath)
+
+      expect($('[data-testid="full-table-link"]').attr('href')).toBe(
+        `${resultPath}&full-table=true`
+      )
+    })
+
+    test('Should render the full table with a Back link and no navigation', async () => {
+      mockResult()
+
+      const { response, $ } = await getPage(`${resultPath}&full-table=true`)
+
+      expect(response.statusCode).toBe(statusCodes.ok)
+      expect($('[data-testid="result-table"]')).toHaveLength(1)
+      expect($('[data-testid="full-table-back"]').attr('href')).toBe(resultPath)
+      expect($('[data-testid="cts-import-form"]')).toHaveLength(0)
+      expect($('.govuk-service-navigation')).toHaveLength(0)
+      expect($('.app-table-scroll')).toHaveLength(0)
+    })
+
+    test('Should fall back to the normal view when there is no result', async () => {
+      mockCdsApi({ runs: () => runsResponse() })
+
+      const { $ } = await getPage(
+        '/dashboard/monitoring/db/cts-import?full-table=true'
+      )
+
+      expect($('[data-testid="cts-import-form"]')).toHaveLength(1)
+      expect($('[data-testid="full-table-back"]')).toHaveLength(0)
+    })
+  })
+
   describe('API errors', () => {
     test('Should show a GOV.UK error summary when the runs cannot be loaded', async () => {
       mockCdsApi({

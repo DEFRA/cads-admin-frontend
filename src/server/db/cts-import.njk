@@ -69,6 +69,9 @@
           attributes: { "data-testid": "result-table" }
         }) }}
       </div>
+      <p class="govuk-body">
+        <a class="govuk-link" href="{{ viewModel.fullTableHref }}" data-testid="full-table-link">View full table</a>
+      </p>
     {% else %}
       <h2 class="govuk-heading-m">{{ viewModel.result.caption }}</h2>
       <p class="govuk-body" data-testid="no-results">There are no results for this run.</p>
