@@ -65,12 +65,17 @@ function logFailure(request, error, statusCode) {
   }
 }
 
+function getBaseQuery(query) {
+  const baseQuery = { ...query }
+  delete baseQuery['full-table']
+  return baseQuery
+}
+
 export const ctsImportController = {
   async handler(request, h) {
     const query = request.query
     const fullTable = query['full-table'] === 'true'
-    const baseQuery = { ...query }
-    delete baseQuery['full-table']
+    const baseQuery = getBaseQuery(query)
     const backHref = buildCtsImportHref(baseQuery)
     const fullTableHref = buildCtsImportHref({
       ...baseQuery,
