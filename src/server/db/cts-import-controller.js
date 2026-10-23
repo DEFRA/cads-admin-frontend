@@ -69,7 +69,8 @@ export const ctsImportController = {
   async handler(request, h) {
     const query = request.query
     const fullTable = query['full-table'] === 'true'
-    const { 'full-table': _fullTable, ...baseQuery } = query
+    const baseQuery = { ...query }
+    delete baseQuery['full-table']
     const backHref = buildCtsImportHref(baseQuery)
     const fullTableHref = buildCtsImportHref({
       ...baseQuery,
@@ -119,7 +120,7 @@ export const ctsImportController = {
           }
         : null
 
-    if (fullTable && result && result.rows.length) {
+    if (fullTable && result.rows?.length) {
       return h
         .view('db/cts-import-full', {
           pageTitle,
