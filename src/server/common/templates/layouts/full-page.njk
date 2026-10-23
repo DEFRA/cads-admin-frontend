@@ -1,0 +1,25 @@
+{% extends "govuk/template.njk" %}
+
+{% set mainClasses = "app-full-table-wrapper" %}
+
+{% block head %}
+  <link href="{{ getAssetPath('stylesheets/application.scss') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pageTitle %}
+  {{ pageTitle }} | {{ serviceName }}
+{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block main %}
+  <main class="govuk-main-wrapper {{ mainClasses }}" id="main-content" role="main">
+    {% block content %}{% endblock %}
+  </main>
+{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block bodyEnd %}
+  <script type="module" src="{{ getAssetPath('application.js') }}"></script>
+{% endblock %}

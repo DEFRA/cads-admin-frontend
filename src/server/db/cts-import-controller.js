@@ -26,6 +26,11 @@ const breadcrumbs = [
 
 const runIdPattern = /^[1-9]\d*$/
 
+function buildCtsImportHref(query) {
+  const search = new URLSearchParams(query).toString()
+  return search ? `${ctsImportPath}?${search}` : ctsImportPath
+}
+
 function validate(query) {
   const errors = {}
   if (!runIdPattern.test(query.runId ?? '')) {
@@ -63,6 +68,13 @@ function logFailure(request, error, statusCode) {
 export const ctsImportController = {
   async handler(request, h) {
     const query = request.query
+    const fullTable = query['full-table'] === 'true'
+    const { 'full-table': _fullTable, ...baseQuery } = query
+    const backHref = buildCtsImportHref(baseQuery)
+    const fullTableHref = buildCtsImportHref({
+      ...baseQuery,
+      'full-table': 'true'
+    })
     const submitted = query.runId !== undefined || query.command !== undefined
     const fieldErrors = submitted ? validate(query) : {}
     const shouldRunCommand = submitted && !Object.keys(fieldErrors).length
@@ -107,6 +119,15 @@ export const ctsImportController = {
           }
         : null
 
+    if (fullTable && result && result.rows.length) {
+      return h
+        .view('db/cts-import-full', {
+          pageTitle,
+          viewModel: { result, backHref }
+        })
+        .code(statusCode)
+    }
+
     return h
       .view('db/cts-import', {
         pageTitle: errorList.length ? `Error: ${pageTitle}` : pageTitle,
@@ -120,7 +141,8 @@ export const ctsImportController = {
           commandItems: commandItems(selectedCommand),
           fieldErrors,
           errorList,
-          result
+          result,
+          fullTableHref
         }
       })
       .code(
