@@ -76,7 +76,8 @@ function buildPaginationItems(
             extraParams
           )
         )
-      } else if (gap > 2) {
+      }
+      if (gap > 2) {
         items.push({ ellipsis: true })
       }
     }
