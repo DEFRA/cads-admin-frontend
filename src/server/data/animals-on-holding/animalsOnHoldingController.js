@@ -1,4 +1,5 @@
 import * as animalService from './services/animalService.js'
+import { getPaginationParams } from '../../common/helpers/pagination.js'
 
 const animalsOnHoldingPageTitle = 'Animals on Holding'
 
@@ -47,14 +48,16 @@ export const animalsOnHoldingController = {
     const holding = Array.isArray(holdingResponse)
       ? holdingResponse[0]
       : holdingResponse
-    const totalPages = Math.ceil((holding?.totalRecords ?? 0) / pageSize)
-    const pageUrl = (targetPage) =>
-      `?${new URLSearchParams({
-        ...filters,
-        page: String(targetPage),
-        orderBy,
-        sortDirection
-      })}`
+
+    const isDefaultSort = orderBy === 'Identifier' && sortDirection === 'Desc'
+    const pagination = getPaginationParams(
+      holding?.totalRecords ?? 0,
+      pageSize,
+      page,
+      filters,
+      isDefaultSort ? {} : { orderBy, sortDirection }
+    )
+
     const sortUrl = (column) => {
       const direction =
         column === orderBy && sortDirection === 'Desc' ? 'Asc' : 'Desc'
@@ -89,12 +92,8 @@ export const animalsOnHoldingController = {
         sortLinks: Object.fromEntries(
           sortableColumns.map((column) => [column, sortUrl(column)])
         ),
-        pagination: {
-          previous: page > 1 ? { href: pageUrl(page - 1) } : undefined,
-          next: page < totalPages ? { href: pageUrl(page + 1) } : undefined
-        },
+        pagination,
         holding,
-        totalPages,
         animals: animalsWithDetailUrls
       }
     })

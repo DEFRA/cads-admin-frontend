@@ -106,21 +106,9 @@
     {% else %}
       <p class="govuk-body">No animals found for this holding.</p>
     {% endif %}
+
+    {{ govukPagination(viewModel.pagination) }}
 {% else %}
   <p class="govuk-body" data-testid="no-holdings">No animals on holding found.</p>
-{% endif %}
-
-{% if viewModel.pagination.previous or viewModel.pagination.next %}
-  {{ govukPagination({
-    previous: {
-      href: viewModel.pagination.previous.href,
-      labelText: "Page " + (viewModel.page - 1)
-    } if viewModel.pagination.previous,
-    next: {
-      href: viewModel.pagination.next.href,
-      labelText: "Page " + (viewModel.page + 1)
-    } if viewModel.pagination.next,
-    landmarkLabel: "Animals on holding results"
-  }) }}
 {% endif %}
 {% endblock %}
