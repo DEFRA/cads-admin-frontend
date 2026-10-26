@@ -102,13 +102,7 @@ export async function createServer() {
 
   // Debug auth routes
   if (config.get('oidc.enableDebugEndpoints')) {
-    if (config.get('isProduction')) {
-      server.logger.warn(
-        'OIDC_ENABLE_DEBUG_ENDPOINTS is set but ignored in production'
-      )
-    } else {
-      server.route([...debugAuthRoutes])
-    }
+    server.route([...debugAuthRoutes])
   }
 
   // Register session middleware (Redis session + token refresh)
