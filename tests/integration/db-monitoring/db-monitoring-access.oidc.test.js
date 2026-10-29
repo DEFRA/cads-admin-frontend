@@ -112,7 +112,9 @@ describe('DB Monitoring access with the OIDC mock', () => {
     const response = await get('/dashboard/monitoring/db/postgres-performance')
 
     expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toBe('/login')
+    expect(response.headers.location).toBe(
+      '/login?redirect=%2Fdashboard%2Fmonitoring%2Fdb%2Fpostgres-performance'
+    )
   })
 
   describe('with the admin.db.execute scope', () => {

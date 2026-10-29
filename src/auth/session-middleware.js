@@ -18,6 +18,10 @@ export async function sessionMiddleware(request, h) {
 
   const refreshed = await refreshTokenIfNeeded(session, sessionId, request)
   if (!refreshed) {
+    // The session has expired and could not be refreshed. Clear any stale
+    // credentials so the request is treated as unauthenticated.
+    request.auth.credentials = null
+    request.auth.isAuthenticated = false
     return h.continue
   }
 

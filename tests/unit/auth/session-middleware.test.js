@@ -190,7 +190,7 @@ describe('sessionMiddleware', () => {
     )
   })
 
-  it('drops session when refresh fails', async () => {
+  it('drops session and clears credentials when refresh fails', async () => {
     mockExpired.mockReturnValue(true)
 
     mockGetSession.mockResolvedValue({
@@ -201,13 +201,20 @@ describe('sessionMiddleware', () => {
 
     mockRefresh.mockRejectedValue(new Error('refresh failed'))
 
-    const request = createRequest()
+    const request = createRequest({
+      auth: {
+        artifacts: { sessionId: '12345' },
+        credentials: { user: { roles: [] } }
+      }
+    })
     const h = createH()
 
     const result = await sessionMiddleware(request, h)
 
     expect(mockDropSession).toHaveBeenCalledWith('12345')
     expect(request.cookieAuth.clear).toHaveBeenCalled()
+    expect(request.auth.credentials).toBeNull()
+    expect(request.auth.isAuthenticated).toBe(false)
     expect(result).toBe('continue')
   })
 })
