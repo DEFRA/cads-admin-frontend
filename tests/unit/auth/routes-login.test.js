@@ -117,6 +117,42 @@ describe('GET /login', () => {
     )
   })
 
+  it('stores the safe redirect query param as the post-login target', async () => {
+    server = await createTestServer(loginRoutes)
+
+    const res = await server.inject({
+      method: 'GET',
+      url: '/login?redirect=%2Freport%2Fholding_summary'
+    })
+
+    const redirectUrl = new URL(res.headers.location)
+    const state = redirectUrl.searchParams.get('state')
+
+    expect(setSession).toHaveBeenCalledWith(
+      `oidc:${state}`,
+      expect.objectContaining({ redirectTo: '/report/holding_summary' }),
+      600000
+    )
+  })
+
+  it('ignores an unsafe (off-site) redirect query param', async () => {
+    server = await createTestServer(loginRoutes)
+
+    const res = await server.inject({
+      method: 'GET',
+      url: '/login?redirect=https%3A%2F%2Fevil.example%2Fsteal'
+    })
+
+    const redirectUrl = new URL(res.headers.location)
+    const state = redirectUrl.searchParams.get('state')
+
+    expect(setSession).toHaveBeenCalledWith(
+      `oidc:${state}`,
+      expect.objectContaining({ redirectTo: '/dashboard' }),
+      600000
+    )
+  })
+
   it('redirects with error when IdP returns error', async () => {
     server = await createTestServer(loginRoutes)
 
