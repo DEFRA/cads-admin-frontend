@@ -5,22 +5,26 @@ export const ctsImportErrorMessages = {
   badRequest:
     'The CTS parallel import monitoring service could not process the request',
   unavailable:
-    'There was a problem contacting the CTS parallel import monitoring service. Try again later.'
+    'There was a problem contacting the CTS parallel import monitoring service. Try again later.',
+  commandFailed: 'The database could not run this CTS parallel import command'
 }
 
 export const postgresErrorMessages = {
   forbidden: 'You do not have access to Postgres performance monitoring',
   badRequest: 'The database monitoring service could not process the request',
   unavailable:
-    'There was a problem contacting the database monitoring service. Try again later.'
+    'There was a problem contacting the database monitoring service. Try again later.',
+  commandFailed: 'The database could not run this check'
 }
 
 /**
  * Maps a db admin API error to the status code to respond with and a message
- * that is safe to show. The backend's error detail is never passed through.
+ * that is safe to show. The backend's error detail is only passed through for
+ * 422, which cads-data-service returns only for messages our own SQL functions
+ * raise on purpose, so no database internals are shown.
  *
  * @param {unknown} error
- * @param {{ forbidden: string, badRequest: string, unavailable: string }} messages
+ * @param {{ forbidden: string, badRequest: string, unavailable: string, commandFailed: string }} messages
  */
 export function describeDbAdminError(error, messages) {
   switch (error?.output?.statusCode) {
@@ -29,6 +33,11 @@ export function describeDbAdminError(error, messages) {
       return {
         statusCode: statusCodes.forbidden,
         message: messages.forbidden
+      }
+    case statusCodes.unprocessableEntity:
+      return {
+        statusCode: statusCodes.unprocessableEntity,
+        message: commandFailedMessage(error, messages.commandFailed)
       }
     case statusCodes.badRequest:
       return {
@@ -41,6 +50,15 @@ export function describeDbAdminError(error, messages) {
         message: messages.unavailable
       }
   }
+}
+
+function commandFailedMessage(error, prefix) {
+  const detail = error.output.payload?.detail
+  if (typeof detail !== 'string' || detail === '') {
+    return prefix
+  }
+  // Npgsql prefixes the SQL state, which means nothing to a user
+  return `${prefix}: ${detail.replace(/^P0001: /, '')}`
 }
 
 export function describeCtsImportError(error) {
