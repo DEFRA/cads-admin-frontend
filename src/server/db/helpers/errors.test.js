@@ -48,6 +48,33 @@ describe('#describeDbAdminError', () => {
     })
   })
 
+  test('Should show the database message when a command fails on purpose', () => {
+    const error = Boom.boomify(new Error('Backend error: 422'), {
+      statusCode: 422
+    })
+    error.output.payload = {
+      title: 'Database command failed',
+      status: 422,
+      detail: 'P0001: pg_stat_statements extension is not installed'
+    }
+
+    expect(describeDbAdminError(error, postgresErrorMessages)).toEqual({
+      statusCode: 422,
+      message: `${postgresErrorMessages.commandFailed}: pg_stat_statements extension is not installed`
+    })
+  })
+
+  test('Should fall back to the generic message when a 422 has no detail', () => {
+    const error = Boom.boomify(new Error('Backend error: 422'), {
+      statusCode: 422
+    })
+
+    expect(describeDbAdminError(error, postgresErrorMessages)).toEqual({
+      statusCode: 422,
+      message: postgresErrorMessages.commandFailed
+    })
+  })
+
   test('Should never pass the backend error detail through', () => {
     const error = Boom.boomify(new Error('Backend error: 500'), {
       statusCode: 500
